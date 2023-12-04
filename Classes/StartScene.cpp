@@ -39,7 +39,7 @@ bool Start::init()
 	}
 	else
 	{
-		float x = origin.x - 90 - 30;
+		float x = origin.x - 100;
 		float y = origin.y - 110;
 		startItem->setPosition(Vec2(x, y));
 	}
@@ -56,7 +56,7 @@ bool Start::init()
 	}
 	else
 	{
-		float x = origin.x + 90 - 30;
+		float x = origin.x + 40;
 		float y = origin.y - 110;
 		closeItem->setPosition(Vec2(x, y));
 	}
@@ -68,27 +68,6 @@ bool Start::init()
 	auto menu = Menu::createWithArray(MenuItems);
 	this->addChild(menu, 1);
 
-	/////////////////////////////
-	// 3. add your codes below...
-
-	// add a label shows "Hello World"
-	// create and initialize a label
-	/*
-	auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 24);
-	if (label == nullptr)
-	{
-		problemLoading("'fonts/Marker Felt.ttf'");
-	}
-	else
-	{
-		// position the label on the center of the screen
-		label->setPosition(Vec2(origin.x + visibleSize.width/2,
-								origin.y + visibleSize.height - label->getContentSize().height));
-
-		// add the label as a child to this layer
-		this->addChild(label, 1);
-	}
-	*/
 	// 加入背景图片
 	auto startBackground = Sprite::create("StartBackground.png");
 	if (startBackground == nullptr)
@@ -124,7 +103,7 @@ void Start::menuCloseCallback(Ref* pSender)
 void Start::menuItemSettingCallback(Ref *pSender)
 {
 	// 切换页面
-	auto sc = MyMap::createScene();
+	auto MyMap = MyMap::createScene();
 	// 当前场景压入栈中
-	Director::getInstance()->pushScene(sc);
+	Director::getInstance()->pushScene(MyMap);
 }
