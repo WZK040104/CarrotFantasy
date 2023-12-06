@@ -1,4 +1,3 @@
-#pragma once
 #ifndef __MAP_SCENE_H__
 #define __MAP_SCENE_H__
 
@@ -11,8 +10,8 @@ public:
 
 	virtual bool init();
 
-	// 进入下一界面
-	void menuItemSettingCallback(Ref *pSender);
+	// 返回上一页面
+	void menuOkCallback(Ref *pSender);
 
 	// implement the "static create()" method manually
 	CREATE_FUNC(MyMap);

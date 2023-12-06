@@ -11,10 +11,9 @@ public:
 	virtual bool init();
 
 	// 退出游戏函数
-	void menuCloseCallback(cocos2d::Ref* pSender);
+	void menuCloseCallback(Ref* pSender);
 	// 进入下一界面
 	void menuItemSettingCallback(Ref *pSender);
-
 	// implement the "static create()" method manually
 	CREATE_FUNC(Start);
 };

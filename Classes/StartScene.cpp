@@ -1,3 +1,4 @@
+#include "BackgroundMusic.h"
 #include "MapScene.h"
 #include "StartScene.h"
 #include "SimpleAudioEngine.h"
@@ -27,6 +28,19 @@ bool Start::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	// 加入背景图片
+	auto startBackground = Sprite::create("StartBackground.png");
+	if (startBackground == nullptr)
+	{
+		problemLoading("'StartBackground.png'");
+	}
+	else
+	{
+		startBackground->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+
+		this->addChild(startBackground, 0);
+	}
+
 	/* 开始游戏按钮 */
 	auto startItem = MenuItemImage::create("StartButton.png",
 		"StartButton.png", CC_CALLBACK_1(Start::menuItemSettingCallback, this));
@@ -42,6 +56,7 @@ bool Start::init()
 		float x = origin.x - 100;
 		float y = origin.y - 110;
 		startItem->setPosition(Vec2(x, y));
+		this->addChild(startItem, 0);
 	}
 
 	/* 关闭游戏按钮 */
@@ -59,6 +74,7 @@ bool Start::init()
 		float x = origin.x + 40;
 		float y = origin.y - 110;
 		closeItem->setPosition(Vec2(x, y));
+		this->addChild(closeItem, 0);
 	}
 
 	// 创建菜单
@@ -68,18 +84,9 @@ bool Start::init()
 	auto menu = Menu::createWithArray(MenuItems);
 	this->addChild(menu, 1);
 
-	// 加入背景图片
-	auto startBackground = Sprite::create("StartBackground.png");
-	if (startBackground == nullptr)
-	{
-		problemLoading("'StartBackground.png'");
-	}
-	else
-	{
-		startBackground->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-
-		this->addChild(startBackground, 0);
-	}
+	/* 播放背景音乐 */
+	//SoundManager::MusicSet();
+	//SoundManager::BackgroundMusic();
 
 	return true;
 }

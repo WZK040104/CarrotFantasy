@@ -1,4 +1,5 @@
 #include "MapScene.h"
+#include "StartScene.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 
@@ -18,7 +19,7 @@ static void problemLoading(const char* filename)
 
 bool MyMap::init()
 {
-	if (!MyMap::init())
+	if (!Scene::init())
 	{
 		return false;
 	}
@@ -26,13 +27,60 @@ bool MyMap::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	// 添加文字
+	auto maplabel = Label::createWithTTF("Map", "fonts/Marker Felt.ttf", 24);
+	if (maplabel == nullptr)
+	{
+		problemLoading("'fonts/Marker Felt.ttf'");
+	}
+	else
+	{
+		maplabel->setPosition(Vec2(origin.x + visibleSize.width / 2,
+			origin.y + visibleSize.height - maplabel->getContentSize().height));
+
+		this->addChild(maplabel, 1);
+	}
+	maplabel->setColor(Color3B(0, 0, 0));
+
+	// 返回按钮
+	auto returnItem = MenuItemImage::create("Return.png",
+		"Return.png", CC_CALLBACK_1(MyMap::menuOkCallback, this));
+
+	if (returnItem == nullptr
+		|| returnItem->getContentSize().width <= 0
+		|| returnItem->getContentSize().height <= 0)
+	{
+		problemLoading("'Return.png'");
+	}
+	else
+	{
+		float x = origin.x + visibleSize.width - returnItem->getContentSize().width / 2;
+		float y = origin.y + returnItem->getContentSize().height / 2;
+		returnItem->setPosition(Vec2(x, y));
+	}
+
+	auto menu = Menu::create(returnItem, NULL);
+	menu->setPosition(Vec2::ZERO);
+	this->addChild(menu, 1);
+
+	// 加入背景图片
+	auto mapBackground = Sprite::create("MapBackground.png");
+	if (mapBackground == nullptr)
+	{
+		problemLoading("'MapBackground.png'");
+	}
+	else
+	{
+		mapBackground->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+		this->addChild(mapBackground, 0);
+	}
+
 	return true;
 }
 
-void MyMap::menuItemSettingCallback(Ref *pSender)
+// 返回上一页面
+void MyMap::menuOkCallback(Ref *pSender)
 {
-	// 切换页面
-	auto sc = MyMap::createScene();
-	// 当前场景压入栈中
-	Director::getInstance()->pushScene(sc);
+	// 栈顶场景弹栈
+	Director::getInstance()->popScene();
 }
