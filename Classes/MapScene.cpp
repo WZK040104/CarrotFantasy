@@ -2,6 +2,7 @@
 #include "StartScene.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
+#include "GameScene.h"
 
 USING_NS_CC;
 
@@ -54,14 +55,10 @@ bool MyMap::init()
 	}
 	else
 	{
-		float x = origin.x + visibleSize.width - returnItem->getContentSize().width / 2;
-		float y = origin.y + returnItem->getContentSize().height / 2;
+		float x = origin.x + 175;
+		float y = origin.y -148;
 		returnItem->setPosition(Vec2(x, y));
 	}
-
-	auto menu = Menu::create(returnItem, NULL);
-	menu->setPosition(Vec2::ZERO);
-	this->addChild(menu, 1);
 
 	// 加入背景图片
 	auto mapBackground = Sprite::create("MapBackground.png");
@@ -75,6 +72,48 @@ bool MyMap::init()
 		this->addChild(mapBackground, 0);
 	}
 
+	/* 地图一 */
+	auto map_one = MenuItemImage::create("Map_one.png",
+		"Map_one.png", CC_CALLBACK_1(MyMap::menuItemSettingCallback_one, this));
+
+	if (map_one == nullptr
+		|| map_one->getContentSize().width <= 0
+		|| map_one->getContentSize().height <= 0)
+	{
+		problemLoading("'Map_one.png'");
+	}
+	else
+	{
+		float x = origin.x;
+		float y = origin.y;
+		map_one->setPosition(Vec2(origin.x - 125, origin.y - 20));
+	}
+
+	/* 地图二 */
+	auto map_two = MenuItemImage::create("Map_two.png",
+		"Map_two.png", CC_CALLBACK_1(MyMap::menuItemSettingCallback_two, this));
+
+	if (map_two == nullptr
+		|| map_two->getContentSize().width <= 0
+		|| map_two->getContentSize().height <= 0)
+	{
+		problemLoading("'Map_two.png'");
+	}
+	else
+	{
+		float x = origin.x;
+		float y = origin.y;
+		map_two->setPosition(Vec2(origin.x+75, origin.y - 20));
+	}
+
+	// 创建菜单
+	Vector<MenuItem*> MenuItems;
+	MenuItems.pushBack(returnItem);
+	MenuItems.pushBack(map_one);
+	MenuItems.pushBack(map_two);
+	auto menu = Menu::createWithArray(MenuItems);
+	this->addChild(menu, 1);
+
 	return true;
 }
 
@@ -83,4 +122,22 @@ void MyMap::menuOkCallback(Ref *pSender)
 {
 	// 栈顶场景弹栈
 	Director::getInstance()->popScene();
+}
+
+// 进入地图一
+void MyMap::menuItemSettingCallback_one(Ref *pSender)
+{
+	// 切换页面
+	auto Game_one = Game_one::createScene();
+	// 当前场景压入栈中
+	Director::getInstance()->pushScene(Game_one);
+}
+
+// 进入地图二
+void MyMap::menuItemSettingCallback_two(Ref *pSender)
+{
+	// 切换页面
+	auto Game_two = Game_two::createScene();
+	// 当前场景压入栈中
+	Director::getInstance()->pushScene(Game_two);
 }

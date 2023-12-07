@@ -11,7 +11,7 @@ Scene* Start::createScene()
 	return Start::create();
 }
 
-// Print useful error message instead of segfaulting when files are not there.
+// 找不到文件时抛出异常
 static void problemLoading(const char* filename)
 {
 	printf("Error while loading: %s\n", filename);
@@ -56,7 +56,6 @@ bool Start::init()
 		float x = origin.x - 100;
 		float y = origin.y - 110;
 		startItem->setPosition(Vec2(x, y));
-		this->addChild(startItem, 0);
 	}
 
 	/* 关闭游戏按钮 */
@@ -74,7 +73,6 @@ bool Start::init()
 		float x = origin.x + 40;
 		float y = origin.y - 110;
 		closeItem->setPosition(Vec2(x, y));
-		this->addChild(closeItem, 0);
 	}
 
 	// 创建菜单
@@ -85,9 +83,8 @@ bool Start::init()
 	this->addChild(menu, 1);
 
 	/* 播放背景音乐 */
-	//SoundManager::MusicSet();
 	//SoundManager::BackgroundMusic();
-
+	//SoundManager::MusicSet();
 	return true;
 }
 
