@@ -3,6 +3,7 @@
 #include "StartScene.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
+using  namespace  CocosDenshion;
 
 USING_NS_CC;
 
@@ -83,8 +84,12 @@ bool Start::init()
 	this->addChild(menu, 1);
 
 	/* ²¥·Å±³¾°ÒôÀÖ */
-	//SoundManager::BackgroundMusic();
-	//SoundManager::MusicSet();
+	auto audio = SimpleAudioEngine::getInstance();
+	// Ô¤¼ÓÔØ
+	audio->preloadBackgroundMusic("BackgroundMusic.mp3");
+	// ·´¸´²¥·Å
+	audio->playBackgroundMusic("BackgroundMusic.mp3", true);
+
 	return true;
 }
 
