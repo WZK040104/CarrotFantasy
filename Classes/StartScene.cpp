@@ -3,9 +3,14 @@
 #include "StartScene.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
+
 using  namespace  CocosDenshion;
 
 USING_NS_CC;
+
+bool map_one_finish = false;
+bool map_two_finish = false;
+bool map_two_unlock = false;
 
 Scene* Start::createScene()
 {
@@ -111,8 +116,6 @@ void Start::menuCloseCallback(Ref* pSender)
 
 void Start::menuItemSettingCallback(Ref *pSender)
 {
-	// 切换页面
 	auto MyMap = MyMap::createScene();
-	// 当前场景压入栈中
 	Director::getInstance()->pushScene(MyMap);
 }

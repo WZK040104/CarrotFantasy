@@ -10,10 +10,12 @@ public:
 
 	virtual bool init();
 
-	// 退出游戏函数
-	void menuCloseCallback(Ref* pSender);
 	// 返回上一页面
 	void menuOkCallback(Ref *pSender);
+	// 暂停
+	void Pause(Ref* pSender);
+	// 游戏通关
+	void Success(Ref* pSender);
 	// implement the "static create()" method manually
 	CREATE_FUNC(Game_one);
 };
@@ -25,10 +27,12 @@ public:
 
 	virtual bool init();
 
-	// 退出游戏函数
-	void menuCloseCallback(Ref* pSender);
 	// 返回上一页面
 	void menuOkCallback(Ref *pSender);
+	// 暂停
+	void Pause(Ref* pSender);
+	// 游戏通关
+	void Success(Ref* pSender);
 	// implement the "static create()" method manually
 	CREATE_FUNC(Game_two);
 };

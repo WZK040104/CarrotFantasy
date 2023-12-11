@@ -3,6 +3,7 @@
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "GameScene.h"
+#include "GameEnd.h"
 
 USING_NS_CC;
 
@@ -30,7 +31,9 @@ bool MyMap::init()
 
 	// 添加文字
 	auto maplabel = Label::createWithTTF("Map", "fonts/Marker Felt.ttf", 24);
-	if (maplabel == nullptr)
+	auto maplabel_one = Label::createWithTTF("1", "fonts/Marker Felt.ttf", 24);
+	auto maplabel_two = Label::createWithTTF("2", "fonts/Marker Felt.ttf", 24);
+	if (maplabel == nullptr || maplabel_one == nullptr || maplabel_two == nullptr)
 	{
 		problemLoading("'fonts/Marker Felt.ttf'");
 	}
@@ -38,10 +41,18 @@ bool MyMap::init()
 	{
 		maplabel->setPosition(Vec2(origin.x + visibleSize.width / 2,
 			origin.y + visibleSize.height - maplabel->getContentSize().height));
+		maplabel_one->setPosition(Vec2(origin.x + visibleSize.width / 2 - 100,
+			origin.y + visibleSize.height - maplabel->getContentSize().height - 50));
+		maplabel_two->setPosition(Vec2(origin.x + visibleSize.width / 2 + 100,
+			origin.y + visibleSize.height - maplabel->getContentSize().height - 50));
 
 		this->addChild(maplabel, 1);
+		this->addChild(maplabel_one, 1);
+		this->addChild(maplabel_two, 1);
 	}
 	maplabel->setColor(Color3B(0, 0, 0));
+	maplabel_one->setColor(Color3B(0, 0, 0));
+	maplabel_two->setColor(Color3B(0, 0, 0));
 
 	// 返回按钮
 	auto returnItem = MenuItemImage::create("Return.png",
@@ -56,7 +67,7 @@ bool MyMap::init()
 	else
 	{
 		float x = origin.x + 175;
-		float y = origin.y -148;
+		float y = origin.y - 148;
 		returnItem->setPosition(Vec2(x, y));
 	}
 
@@ -89,6 +100,19 @@ bool MyMap::init()
 		map_one->setPosition(Vec2(origin.x - 125, origin.y - 20));
 	}
 
+	GameEnd gameEnd;
+
+	if (gameEnd.map_one_finish) {
+		auto finish_one = Sprite::create("Finish.png");
+		if (finish_one == nullptr)
+			problemLoading("'Finish.png'");
+		else
+		{
+			finish_one->setPosition(Vec2(origin.x - 125, origin.y - 20));
+			this->addChild(finish_one, 2);
+		}
+	}
+
 	/* 地图二 */
 	auto map_two = MenuItemImage::create("Map_two.png",
 		"Map_two.png", CC_CALLBACK_1(MyMap::menuItemSettingCallback_two, this));
@@ -103,7 +127,18 @@ bool MyMap::init()
 	{
 		float x = origin.x;
 		float y = origin.y;
-		map_two->setPosition(Vec2(origin.x+75, origin.y - 20));
+		map_two->setPosition(Vec2(origin.x + 75, origin.y - 20));
+	}
+
+	if (gameEnd.map_two_finish) {
+		auto finish_two = Sprite::create("Finish.png");
+		if (finish_two == nullptr)
+			problemLoading("'Finish.png'");
+		else
+		{
+			finish_two->setPosition(Vec2(origin.x + 12, origin.y + visibleSize.height - 12));
+			this->addChild(finish_two, 1);
+		}
 	}
 
 	// 创建菜单

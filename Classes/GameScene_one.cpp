@@ -2,12 +2,17 @@
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "GameScene.h"
+#include "Gamepause.h"
+#include "GameEnd.h"
 
 USING_NS_CC;
 
 Scene* Game_one::createScene()
 {
-	return Game_one::create();
+	Scene *scene = Scene::create();
+	Game_one *layer = Game_one::create();
+	scene->addChild(layer);
+	return scene;
 }
 // 找不到文件时抛出异常
 static void problemLoading(const char* filename)
@@ -39,6 +44,31 @@ bool Game_one::init()
 		this->addChild(map_one, 0);
 	}
 
+	// 加入金币图片
+	auto moneypic = Sprite::create("Money.png");
+	if (moneypic == nullptr)
+	{
+		problemLoading("'Money.png'");
+	}
+	else
+	{
+		moneypic->setPosition(Vec2(origin.x+12, origin.y+ visibleSize.height-12));
+		this->addChild(moneypic, 1);
+	}
+
+	// 添加文字
+	auto mapnum = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 18);
+	if (mapnum == nullptr)
+	{
+		problemLoading("'fonts/Marker Felt.ttf'");
+	}
+	else
+	{
+		mapnum->setPosition(Vec2(origin.x + 35, origin.y + visibleSize.height - 14));
+		this->addChild(mapnum, 1);
+	}
+	mapnum->setColor(Color3B(255, 255, 0));
+
 	// 返回按钮
 	auto returnItem = MenuItemImage::create("Return.png",
 		"Return.png", CC_CALLBACK_1(Game_one::menuOkCallback, this));
@@ -56,18 +86,24 @@ bool Game_one::init()
 		returnItem->setPosition(Vec2(x, y));
 	}
 
-	/* 播放背景音乐 */
-	auto musicItem = MenuItemImage::create("SoundButton.png",
-		"SoundButton.png", CC_CALLBACK_1(SoundManager::BackgroundMusic, this));
+	// 暂停功能
+	auto pauseItem = MenuItemImage::create("Pause.png",
+		"Pause.png", CC_CALLBACK_1(Game_one::Success, this));
 
-	float x = origin.x+175;
-	float y = origin.y+148;
-	musicItem->setPosition(Vec2(x, y));
-
+	if (pauseItem == nullptr
+		|| pauseItem->getContentSize().width <= 0
+		|| pauseItem->getContentSize().height <= 0)
+	{
+		problemLoading("'Pause.png'");
+	}
+	else
+	{
+		pauseItem->setPosition(Vec2(origin.x + 175, origin.y + 148));
+	}
 	// 创建菜单
 	Vector<MenuItem*> MenuItems;
 	MenuItems.pushBack(returnItem);
-	MenuItems.pushBack(musicItem);
+	MenuItems.pushBack(pauseItem);
 	auto menu = Menu::createWithArray(MenuItems);
 	this->addChild(menu, 1);
 
@@ -81,29 +117,39 @@ void Game_one::menuOkCallback(Ref *pSender)
 	Director::getInstance()->popScene();
 }
 
-void Game_one::menuCloseCallback(Ref* pSender)
+// 暂停游戏
+void Game_one::Pause(Ref* pSender)
 {
-	// 关闭页面，退出游戏
-	Director::getInstance()->end();
+	// 得到窗口的大小
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	RenderTexture *renderTexture = RenderTexture::create(visibleSize.width+48, visibleSize.height);
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	exit(0);
-#endif
+	// 遍历当前类的所有子节点信息，画入renderTexture中。
+	// 这里类似截图。
+	renderTexture->begin();
+	this->getParent()->visit();
+	renderTexture->end();
 
-	/*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
-
-	//EventCustom customEndEvent("Game_one_scene_close_event");
-	//_eventDispatcher->dispatchEvent(&customEndEvent);
+	// 将游戏界面暂停，压入场景堆栈。并切换到GamePause界面
+	Director::getInstance()->pushScene(Gamepause::scene(renderTexture));
 }
 
-void SoundManager::BackgroundMusic(Ref* pSender)
+// 游戏通关
+void Game_one::Success(Ref* pSender)
 {
-	auto audio = SimpleAudioEngine::getInstance();
-	// 预加载
-	audio->preloadBackgroundMusic("BackgroundMusic.mp3");
-	// 控制音量
-	audio->setEffectsVolume(0.5);
-	audio->setBackgroundMusicVolume(0.5);
-	// 反复播放
-	audio->playBackgroundMusic("BackgroundMusic.mp3", true);
+	GameEnd gameEnd;
+	gameEnd.map_one_finish = true;
+
+	// 得到窗口的大小
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	RenderTexture *renderTexture = RenderTexture::create(visibleSize.width + 48, visibleSize.height);
+
+	// 遍历当前类的所有子节点信息，画入renderTexture中。
+	// 这里类似截图。
+	renderTexture->begin();
+	this->getParent()->visit();
+	renderTexture->end();
+
+	// 将游戏界面暂停，压入场景堆栈。并切换到GamePause界面
+	Director::getInstance()->pushScene(GameEnd::scene(renderTexture));
 }
