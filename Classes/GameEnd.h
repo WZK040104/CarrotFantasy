@@ -15,8 +15,5 @@ public:
 	void ContinueGame(Ref *pSender);
 	// ·µ»Ø²Ëµ¥
 	void ReturnMenuGame(Ref *pSender);
-
-	bool map_one_finish;
-	bool map_two_finish;
 };
 #endif 

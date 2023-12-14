@@ -22,18 +22,5 @@ public:
 		// 反复播放
 		audio->playBackgroundMusic("BackgroundMusic.mp3", true);
 	}
-	/* 设置音乐控制按钮 */
-	/*void MusicSet(Ref* pSender)
-	{
-		auto visibleSize = Director::getInstance()->getVisibleSize();
-		Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-		auto startItem = MenuItemImage::create("SoundButton.png",
-			"SoundButton.png", CC_CALLBACK_1(BackgroundMusic, this));
-
-		float x = origin.x;
-		float y = origin.y;
-		startItem->setPosition(Vec2(x, y));
-	}*/
 };
 #endif

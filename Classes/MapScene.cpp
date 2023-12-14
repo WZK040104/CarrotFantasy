@@ -19,6 +19,10 @@ static void problemLoading(const char* filename)
 	printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
+extern bool map_one_finish;
+extern bool map_two_finish;
+extern bool map_two_unlock;
+
 bool MyMap::init()
 {
 	if (!Scene::init())
@@ -100,16 +104,24 @@ bool MyMap::init()
 		map_one->setPosition(Vec2(origin.x - 125, origin.y - 20));
 	}
 
-	GameEnd gameEnd;
-
-	if (gameEnd.map_one_finish) {
+	if (map_one_finish) {
 		auto finish_one = Sprite::create("Finish.png");
 		if (finish_one == nullptr)
 			problemLoading("'Finish.png'");
 		else
 		{
-			finish_one->setPosition(Vec2(origin.x - 125, origin.y - 20));
+			finish_one->setPosition(Vec2(visibleSize.width / 2 + origin.x - 20, visibleSize.height / 2 + origin.y + 35));
 			this->addChild(finish_one, 2);
+		}
+	}
+	else {
+		auto unfinish_one = Sprite::create("Unfinish.png");
+		if (unfinish_one == nullptr)
+			problemLoading("'Unfinish.png'");
+		else
+		{
+			unfinish_one->setPosition(Vec2(visibleSize.width / 2 + origin.x - 30, visibleSize.height / 2 + origin.y + 35));
+			this->addChild(unfinish_one, 2);
 		}
 	}
 
@@ -130,14 +142,36 @@ bool MyMap::init()
 		map_two->setPosition(Vec2(origin.x + 75, origin.y - 20));
 	}
 
-	if (gameEnd.map_two_finish) {
-		auto finish_two = Sprite::create("Finish.png");
-		if (finish_two == nullptr)
-			problemLoading("'Finish.png'");
+	if (map_two_unlock) {
+		if (map_two_finish) {
+			auto finish_two = Sprite::create("Finish.png");
+			if (finish_two == nullptr)
+				problemLoading("'Finish.png'");
+			else
+			{
+				finish_two->setPosition(Vec2(visibleSize.width + origin.x - 30, visibleSize.height / 2 + origin.y + 35));
+				this->addChild(finish_two, 2);
+			}
+		}
+		else {
+			auto unfinish_two = Sprite::create("Unfinish.png");
+			if (unfinish_two == nullptr)
+				problemLoading("'Unfinish.png'");
+			else
+			{
+				unfinish_two->setPosition(Vec2(visibleSize.width + origin.x - 40, visibleSize.height / 2 + origin.y + 35));
+				this->addChild(unfinish_two, 2);
+			}
+		}
+	}
+	else {
+		auto unlock_two = Sprite::create("Unlock.png");
+		if (unlock_two == nullptr)
+			problemLoading("'Unlock.png'");
 		else
 		{
-			finish_two->setPosition(Vec2(origin.x + 12, origin.y + visibleSize.height - 12));
-			this->addChild(finish_two, 1);
+			unlock_two->setPosition(Vec2(visibleSize.width + origin.x - 40, visibleSize.height / 2 + origin.y + 35));
+			this->addChild(unlock_two, 2);
 		}
 	}
 
@@ -155,24 +189,21 @@ bool MyMap::init()
 // 返回上一页面
 void MyMap::menuOkCallback(Ref *pSender)
 {
-	// 栈顶场景弹栈
 	Director::getInstance()->popScene();
 }
 
 // 进入地图一
 void MyMap::menuItemSettingCallback_one(Ref *pSender)
 {
-	// 切换页面
 	auto Game_one = Game_one::createScene();
-	// 当前场景压入栈中
 	Director::getInstance()->pushScene(Game_one);
 }
 
 // 进入地图二
 void MyMap::menuItemSettingCallback_two(Ref *pSender)
 {
-	// 切换页面
-	auto Game_two = Game_two::createScene();
-	// 当前场景压入栈中
-	Director::getInstance()->pushScene(Game_two);
+	if (map_two_unlock) {
+		auto Game_two = Game_two::createScene();
+		Director::getInstance()->pushScene(Game_two);
+	}
 }

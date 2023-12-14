@@ -21,6 +21,11 @@ Scene* GameEnd::scene(RenderTexture* sqr)
 	return scene;
 }
 
+extern bool map_one_finish;
+extern bool map_two_finish;
+extern bool map_one_continue;
+extern bool map_two_continue;
+
 bool GameEnd::init()
 {
 	if (!Layer::init())
@@ -41,7 +46,7 @@ bool GameEnd::init()
 
 	returnmenuItem->setPosition(Vec2(origin.x + 10, origin.y -15));
 
-	// 暂停图框
+	// 通关图框
 	auto successMenu = Sprite::create("Menu.png");
 	successMenu->setPosition(Vec2(visibleSize.width / 2 + 30, visibleSize.height / 2-15));
 	this->addChild(successMenu, 1);
@@ -63,24 +68,43 @@ bool GameEnd::init()
 // 继续下一关卡
 void GameEnd::ContinueGame(Ref *pSender)
 {
-	// 栈顶场景弹栈
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
-	// 切换页面
-	auto Game_two = Game_two::createScene();
-	// 当前场景压入栈中
-	Director::getInstance()->pushScene(Game_two);
+	Director::getInstance()->popScene();
+
+	if (map_one_continue) {
+		map_one_finish = true;
+		map_one_continue = false;
+		auto MyMap = MyMap::createScene();
+		Director::getInstance()->pushScene(MyMap);
+		auto Game_two = Game_two::createScene();
+		Director::getInstance()->pushScene(Game_two);
+		map_two_continue = true;
+	}
+	else if (map_two_continue) {
+		map_two_finish = true;
+		map_two_continue = false;
+		auto MyMap = MyMap::createScene();
+		Director::getInstance()->pushScene(MyMap);
+	}
 }
 
 // 返回菜单
 void GameEnd::ReturnMenuGame(Ref *pSender)
 {
-	// 栈顶场景弹栈
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
-	// 切换页面
+
+	if (map_one_continue) {
+		map_one_finish = true;
+		map_one_continue = false;
+	}
+	else if (map_two_continue) {
+		map_two_finish = true;
+		map_two_continue = false;
+	}
+
 	auto MyMap = MyMap::createScene();
-	// 当前场景压入栈中
 	Director::getInstance()->pushScene(MyMap);
 }

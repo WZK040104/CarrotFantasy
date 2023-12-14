@@ -11,6 +11,8 @@ USING_NS_CC;
 bool map_one_finish = false;
 bool map_two_finish = false;
 bool map_two_unlock = false;
+bool map_one_continue = false;
+bool map_two_continue = false;
 
 Scene* Start::createScene()
 {
