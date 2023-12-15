@@ -1,11 +1,13 @@
 #include"CEnemy.h"
 #include"Enemy_kind.h"
 #include<vector>
+#include <chrono> // for std::chrono::seconds
+#include <thread> // for std::this_thread::sleep_for
 using namespace std;
 
 vector<CEnemy> EnemyExist;
 
-void generateEnemy(vector<CEnemy>& EnemyExist, int enemyType, int x, int y)//ÔÚ¹ÖÎï³öÉúµãÉú³ÉÒ»Ö»¹ÖÎï
+void generateOneEnemy(vector<CEnemy>& EnemyExist, int enemyType, double x, double y)//ÔÚ¹ÖÎï³öÉúµãÉú³ÉÒ»Ö»¹ÖÎï
 {
 	CEnemy* newEnemy = nullptr;
 
@@ -34,7 +36,44 @@ void generateEnemy(vector<CEnemy>& EnemyExist, int enemyType, int x, int y)//ÔÚ¹
 
     if (newEnemy)
     {
+		newEnemy->set_x(x);
+		newEnemy->set_y(y);
         EnemyExist.push_back(*newEnemy);
         delete newEnemy;
     }
+}
+
+void deleteEnemy(vector<CEnemy>& EnemyExist)//É¾È¥ËÀÈ¥µÄµĞÈË
+{
+	for (int i = 0; i < EnemyExist.size(); i++)
+	{
+		if (EnemyExist[i].alive() == 0)
+		{
+			auto it = EnemyExist.begin() + i;
+			EnemyExist.erase(it);
+		}
+	}
+}
+
+int numofEnemyAlive(vector<CEnemy>& EnemyExist)
+{
+	int num = 0;
+	for (int i = 0; i < EnemyExist.size(); i++)
+	{
+		if (EnemyExist[i].alive() == 1)
+		{
+			num++;
+		}
+	}
+
+	return num;
+}
+
+void generateflag(int flag, vector<vector<int>> Enemyflag, double x, double y)//Éú³ÉÒ»¸ö²¨´ÎµÄ¹ÖÎï£¬ÆğÊ¼×ø±êÎªxy
+{
+	for (int i = 0; i < Enemyflag[flag].size(); i++)
+	{
+		generateOneEnemy(EnemyExist, Enemyflag[flag][i], x, y);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
 }

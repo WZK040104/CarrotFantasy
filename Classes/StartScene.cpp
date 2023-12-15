@@ -1,10 +1,8 @@
-#include "BackgroundMusic.h"
 #include "MapScene.h"
 #include "StartScene.h"
-#include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
-
-using  namespace  CocosDenshion;
+#include "AudioEngine.h"
+using namespace cocos2d::experimental;
 
 USING_NS_CC;
 
@@ -13,6 +11,8 @@ bool map_two_finish = false;
 bool map_two_unlock = false;
 bool map_one_continue = false;
 bool map_two_continue = false;
+bool sound = true;
+int backgroundAudioID;
 
 Scene* Start::createScene()
 {
@@ -35,6 +35,9 @@ bool Start::init()
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	AudioEngine::preload("BackgroundMusic.mp3");
+	backgroundAudioID = AudioEngine::play2d("BackgroundMusic.mp3", true);
 
 	// ¼ÓÈë±³¾°Í¼Æ¬
 	auto startBackground = Sprite::create("StartBackground.png");
@@ -83,19 +86,43 @@ bool Start::init()
 		closeItem->setPosition(Vec2(x, y));
 	}
 
+	/* ¿ªÆôÉùÒô°´Å¥ */
+	auto soundItem = MenuItemImage::create("SoundButton.png",
+		"SoundButton.png", CC_CALLBACK_1(Start::openAndCloseSound, this));
+
+	if (soundItem == nullptr
+		|| soundItem->getContentSize().width <= 0
+		|| soundItem->getContentSize().height <= 0)
+	{
+		problemLoading("'SoundButton.png'");
+	}
+	else
+	{
+		soundItem->setPosition(Vec2(origin.x + 170, origin.y + 120));
+	}
+
+	// ÉùÒô¹Ø±Õ°´Å¥
+	auto soundCloseItem = MenuItemImage::create("SoundCloseButton.png",
+		"SoundCloseButton.png", CC_CALLBACK_1(Start::openAndCloseSound, this));
+
+	if (soundCloseItem == nullptr
+		|| soundCloseItem->getContentSize().width <= 0
+		|| soundCloseItem->getContentSize().height <= 0)
+	{
+		problemLoading("'SoundCloseButton.png'");
+	}
+	else
+	{
+		soundCloseItem->setPosition(Vec2(origin.x + 170, origin.y + 120));
+	}
+
 	// ´´½¨²Ëµ¥
 	Vector<MenuItem*> MenuItems;
 	MenuItems.pushBack(startItem);
 	MenuItems.pushBack(closeItem);
+	MenuItems.pushBack(soundItem);
 	auto menu = Menu::createWithArray(MenuItems);
 	this->addChild(menu, 1);
-
-	/* ²¥·Å±³¾°ÒôÀÖ */
-	auto audio = SimpleAudioEngine::getInstance();
-	// Ô¤¼ÓÔØ
-	audio->preloadBackgroundMusic("BackgroundMusic.mp3");
-	// ·´¸´²¥·Å
-	audio->playBackgroundMusic("BackgroundMusic.mp3", true);
 
 	return true;
 }
@@ -120,4 +147,16 @@ void Start::menuItemSettingCallback(Ref *pSender)
 {
 	auto MyMap = MyMap::createScene();
 	Director::getInstance()->pushScene(MyMap);
+}
+
+void Start::openAndCloseSound(Ref *pSender)
+{
+	if (!sound) {
+		AudioEngine::resume(backgroundAudioID);
+		sound = true;
+	}
+	else{
+		AudioEngine::pause(backgroundAudioID);
+		sound = false;
+	}
 }

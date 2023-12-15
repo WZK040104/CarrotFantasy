@@ -1,4 +1,4 @@
-#ifndef __GBK_TO_UTF_8_H__
+﻿#ifndef __GBK_TO_UTF_8_H__
 #define __GBK_TO_UTF_8_H__
 
 #include "ui/CocosGUI.h"

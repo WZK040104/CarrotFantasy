@@ -17,12 +17,13 @@ public:
 	// 析构函数
 	virtual ~CEnemy();
 	//初始化怪物的生命值,速度，金币
-	void initial(int input_HP, int input_velocity, int input_coins, int x, int y); 
+	void initial(int input_HP, int input_velocity, int input_coins, double x, double y); 
 	//是否活着
-	bool alive(int& gold_coins); 
+	bool alive(); 
 
 	double EnemyPositionX()const;
 	double EnemyPositionY()const;
-
+	void set_x(double input_x);
+	void set_y(double input_y);
 	void HP_calculate(int damage_per_time);
 };

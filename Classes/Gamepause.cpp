@@ -1,6 +1,5 @@
 #include "GameScene.h"
 #include "Gamepause.h"
-#include "Externgame.h"
 
 USING_NS_CC;
 
@@ -20,6 +19,9 @@ Scene* Gamepause::scene(RenderTexture* sqr)
 	scene->addChild(back_sqr);
 	return scene;
 }
+
+extern bool map_one_continue;
+extern bool map_two_continue;
 
 bool Gamepause::init()
 {

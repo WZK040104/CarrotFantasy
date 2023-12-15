@@ -1,4 +1,4 @@
-#include "BackgroundMusic.h"
+ï»¿#include "BackgroundMusic.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "GameScene.h"
@@ -15,7 +15,7 @@ Scene* Game_two::createScene()
 	scene->addChild(layer);
 	return scene;
 }
-// ÕÒ²»µ½ÎÄ¼şÊ±Å×³öÒì³£
+// æ‰¾ä¸åˆ°æ–‡ä»¶æ—¶æŠ›å‡ºå¼‚å¸¸
 static void problemLoading(const char* filename)
 {
 	printf("Error while loading: %s\n", filename);
@@ -36,7 +36,7 @@ bool Game_two::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	// ¼ÓÈë±³¾°Í¼Æ¬
+	// åŠ å…¥èƒŒæ™¯å›¾ç‰‡
 	auto map_two = Sprite::create("GameBackground_two.png");
 	if (map_two == nullptr)
 	{
@@ -49,7 +49,20 @@ bool Game_two::init()
 		this->addChild(map_two, 0);
 	}
 
-	// ¼ÓÈë½ğ±ÒÍ¼Æ¬
+	// åŠ å…¥ä¸Šè¾¹æ å›¾ç‰‡
+	auto upperboard = Sprite::create("Upperboard.png");
+	if (upperboard == nullptr)
+	{
+		problemLoading("'Upperboard.png'");
+	}
+	else
+	{
+		upperboard->setPosition(Vec2(origin.x + visibleSize.width / 2,
+			origin.y + visibleSize.height - upperboard->getContentSize().height / 2));
+		this->addChild(upperboard, 1);
+	}
+
+	// åŠ å…¥é‡‘å¸å›¾ç‰‡
 	auto moneypic = Sprite::create("Money.png");
 	if (moneypic == nullptr)
 	{
@@ -57,11 +70,11 @@ bool Game_two::init()
 	}
 	else
 	{
-		moneypic->setPosition(Vec2(origin.x + 12, origin.y + visibleSize.height - 12));
-		this->addChild(moneypic, 0);
+		moneypic->setPosition(Vec2(origin.x + 22, origin.y + visibleSize.height - 15));
+		this->addChild(moneypic, 2);
 	}
 
-	// Ìí¼ÓÎÄ×Ö
+	// æ·»åŠ æ–‡å­—
 	auto mapnum = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 18);
 	if (mapnum == nullptr)
 	{
@@ -69,12 +82,12 @@ bool Game_two::init()
 	}
 	else
 	{
-		mapnum->setPosition(Vec2(origin.x + 35, origin.y + visibleSize.height - 14));
-		this->addChild(mapnum, 1);
+		mapnum->setPosition(Vec2(origin.x + 43, origin.y + visibleSize.height - 17));
+		this->addChild(mapnum, 2);
 	}
 	mapnum->setColor(Color3B(255, 255, 0));
 
-	// ÔİÍ£¹¦ÄÜ
+	// æš‚åœåŠŸèƒ½
 	auto pauseItem = MenuItemImage::create("Pause.png",
 		"Pause.png", CC_CALLBACK_1(Game_two::Pause, this));
 
@@ -86,10 +99,10 @@ bool Game_two::init()
 	}
 	else
 	{
-		pauseItem->setPosition(Vec2(origin.x + 175, origin.y + 148));
+		pauseItem->setPosition(Vec2(origin.x + 160, origin.y + 143));
 	}
 
-	// ·µ»Ø°´Å¥
+	// è¿”å›æŒ‰é’®
 	auto returnItem = MenuItemImage::create("Return.png",
 		"Return.png", CC_CALLBACK_1(Game_two::Success, this));
 
@@ -106,19 +119,19 @@ bool Game_two::init()
 		returnItem->setPosition(Vec2(x, y));
 	}
 
-	// ´´½¨²Ëµ¥
+	// åˆ›å»ºèœå•
 	Vector<MenuItem*> MenuItems;
 	MenuItems.pushBack(pauseItem);
 	MenuItems.pushBack(returnItem);
 	auto menu = Menu::createWithArray(MenuItems);
 	this->addChild(menu, 1);
 
-	// Ìí¼ÓÊó±êÎ»ÖÃÏÔÊ¾
+	// æ·»åŠ é¼ æ ‡ä½ç½®æ˜¾ç¤º
 	auto mouseListener = EventListenerMouse::create();
 	mouseListener->onMouseDown = CC_CALLBACK_1(Game_two::onMouseDown, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
-	// Ìí¼Ó "carrot" Í¼Æ¬
+	// æ·»åŠ  "carrot" å›¾ç‰‡
 	auto carrot = Sprite::create("carrot.png");
 	if (carrot)
 	{
@@ -126,16 +139,16 @@ bool Game_two::init()
 		this->addChild(carrot, 1);
 
 		auto CarrotHealthBack = Sprite::create("CarrotHealthBack.png");
-		CarrotHealthBack->setPosition(Vec2(103, 280));// ÂÜ²·ÉÏ·½Î»ÖÃ
+		CarrotHealthBack->setPosition(Vec2(103, 275));// èåœä¸Šæ–¹ä½ç½®
 		this->addChild(CarrotHealthBack, 1);
 
-		// Ìí¼ÓÂÜ²·ÑªÌõ
+		// æ·»åŠ èåœè¡€æ¡
 		ProgressTimer* healthBar = ProgressTimer::create(Sprite::create("HealthBar.png"));
 		healthBar->setType(ProgressTimer::Type::BAR);
-		healthBar->setMidpoint(Vec2(0, 0.5));  // ÑªÌõ´Ó×óµ½ÓÒ¼õÉÙ
+		healthBar->setMidpoint(Vec2(0, 0.5));  // è¡€æ¡ä»å·¦åˆ°å³å‡å°‘
 		healthBar->setBarChangeRate(Vec2(1, 0));
-		healthBar->setPosition(Vec2(103, 280));  // ÂÜ²·ÉÏ·½Î»ÖÃ
-		healthBar->setPercentage(100.0f);  // ³õÊ¼ÑªÁ¿°Ù·Ö±È
+		healthBar->setPosition(Vec2(103, 275));  // èåœä¸Šæ–¹ä½ç½®
+		healthBar->setPercentage(100.0f);  // åˆå§‹è¡€é‡ç™¾åˆ†æ¯”
 		this->addChild(healthBar, 2, "healthBar");
 	}
 	else
@@ -143,11 +156,11 @@ bool Game_two::init()
 		problemLoading("'carrot.png'");
 	}
 
-	//Ìí¼Ó³ö¹ÖÅÆÍ¼Æ¬
+	//æ·»åŠ å‡ºæ€ªç‰Œå›¾ç‰‡
 	auto GuideBoard = Sprite::create("GuideBoard.png");
 	if (GuideBoard)
 	{
-		GuideBoard->setPosition(Vec2(424, 75)); //³ö¹ÖÅÆÎ»ÖÃ
+		GuideBoard->setPosition(Vec2(424, 75)); //å‡ºæ€ªç‰Œä½ç½®
 		this->addChild(GuideBoard, 1);
 	}
 	else
@@ -155,8 +168,8 @@ bool Game_two::init()
 		problemLoading("'GuideBoard.png'");
 	}
 
-	// Ìí¼ÓÎÄ×Ö
-	auto countdown = Label::createWithTTF(GBKToUTF8("5Ãëºó¹ÖÎïÀ´Ï®"), "fonts/STHUPO.TTF", 18);
+	// æ·»åŠ æ–‡å­—
+	auto countdown = Label::createWithTTF(GBKToUTF8("5ç§’åæ€ªç‰©æ¥è¢­"), "fonts/STHUPO.TTF", 10);
 	if (countdown == nullptr)
 	{
 		problemLoading("'fonts/STHUPO.TTF'");
@@ -164,23 +177,23 @@ bool Game_two::init()
 	else
 	{
 		countdown->setPosition(Vec2(origin.x + visibleSize.width / 2,
-			origin.y + visibleSize.height - countdown->getContentSize().height));
-		this->addChild(countdown, 1);
+			origin.y + visibleSize.height - countdown->getContentSize().height - 4));
+		this->addChild(countdown, 2);
 	}
 	countdown->setColor(Color3B(255, 255, 255));
 
 	return true;
 }
 
-// ÔİÍ£ÓÎÏ·
+// æš‚åœæ¸¸æˆ
 void Game_two::Pause(Ref* pSender)
 {
-	// µÃµ½´°¿ÚµÄ´óĞ¡
+	// å¾—åˆ°çª—å£çš„å¤§å°
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	RenderTexture *renderTexture = RenderTexture::create(visibleSize.width+48, visibleSize.height);
 
-	// ±éÀúµ±Ç°ÀàµÄËùÓĞ×Ó½ÚµãĞÅÏ¢£¬»­ÈërenderTextureÖĞ¡£
-	// ÕâÀïÀàËÆ½ØÍ¼¡£
+	// éå†å½“å‰ç±»çš„æ‰€æœ‰å­èŠ‚ç‚¹ä¿¡æ¯ï¼Œç”»å…¥renderTextureä¸­ã€‚
+	// è¿™é‡Œç±»ä¼¼æˆªå›¾ã€‚
 	renderTexture->begin();
 	this->getParent()->visit();
 	renderTexture->end();
@@ -188,16 +201,16 @@ void Game_two::Pause(Ref* pSender)
 	Director::getInstance()->pushScene(Gamepause::scene(renderTexture));
 }
 
-// ÓÎÏ·Í¨¹Ø
+// æ¸¸æˆé€šå…³
 void Game_two::Success(Ref* pSender)
 {
 
-	// µÃµ½´°¿ÚµÄ´óĞ¡
+	// å¾—åˆ°çª—å£çš„å¤§å°
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	RenderTexture *renderTexture = RenderTexture::create(visibleSize.width + 48, visibleSize.height);
 
-	// ±éÀúµ±Ç°ÀàµÄËùÓĞ×Ó½ÚµãĞÅÏ¢£¬»­ÈërenderTextureÖĞ¡£
-	// ÕâÀïÀàËÆ½ØÍ¼¡£
+	// éå†å½“å‰ç±»çš„æ‰€æœ‰å­èŠ‚ç‚¹ä¿¡æ¯ï¼Œç”»å…¥renderTextureä¸­ã€‚
+	// è¿™é‡Œç±»ä¼¼æˆªå›¾ã€‚
 	renderTexture->begin();
 	this->getParent()->visit();
 	renderTexture->end();
@@ -207,23 +220,23 @@ void Game_two::Success(Ref* pSender)
 
 void Game_two::onMouseDown(EventMouse* event)
 {
-	// »ñÈ¡Êó±êµã»÷Î»ÖÃ
+	// è·å–é¼ æ ‡ç‚¹å‡»ä½ç½®
 	Vec2 mousePosition = Director::getInstance()->getRunningScene()->convertToNodeSpace(event->getLocationInView());
 
-	// Êä³öÊó±êÎ»ÖÃ
+	// è¾“å‡ºé¼ æ ‡ä½ç½®
 	log("Mouse Clicked at (%.2f, %.2f)", mousePosition.x, mousePosition.y);
 
-	// ÔÚÆÁÄ»ÉÏÏÔÊ¾Êó±êÎ»ÖÃ
+	// åœ¨å±å¹•ä¸Šæ˜¾ç¤ºé¼ æ ‡ä½ç½®
 	drawMousePositionLabel(mousePosition);
 }
 
-// ÔÚÆÁÄ»ÉÏÏÔÊ¾Êó±êÎ»ÖÃ
+// åœ¨å±å¹•ä¸Šæ˜¾ç¤ºé¼ æ ‡ä½ç½®
 void Game_two::drawMousePositionLabel(const Vec2& position)
 {
-	// ÒÆ³ıÖ®Ç°µÄ±êÇ©
+	// ç§»é™¤ä¹‹å‰çš„æ ‡ç­¾
 	removeChildByTag(123);
 
-	// ´´½¨±êÇ©²¢ÏÔÊ¾Êó±êÎ»ÖÃ
+	// åˆ›å»ºæ ‡ç­¾å¹¶æ˜¾ç¤ºé¼ æ ‡ä½ç½®
 	auto label = Label::createWithTTF(StringUtils::format("(%.2f, %.2f)", position.x, position.y),
 		"fonts/arial.ttf", 24);
 	label->setPosition(Vec2(100, 100));
