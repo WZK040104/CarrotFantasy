@@ -30,7 +30,7 @@ void generateOneEnemy(vector<CEnemy>& EnemyExist, int enemyType, double x, doubl
             break;
 
         default:
-            // 不支持的防御塔类型
+            // 不支持的敌人类型
             break;
     }
 

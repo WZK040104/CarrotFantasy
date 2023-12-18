@@ -3,6 +3,7 @@
 #include "ui/CocosGUI.h"
 #include "AudioEngine.h"
 using namespace cocos2d::experimental;
+using namespace cocos2d::ui;
 
 USING_NS_CC;
 
@@ -53,8 +54,7 @@ bool Start::init()
 	}
 
 	/* 开始游戏按钮 */
-	auto startItem = MenuItemImage::create("StartButton.png",
-		"StartButton.png", CC_CALLBACK_1(Start::menuItemSettingCallback, this));
+	auto startItem = Button::create("StartButton.png", "StartButton_selected.png");
 
 	if (startItem == nullptr
 		|| startItem->getContentSize().width <= 0
@@ -64,14 +64,29 @@ bool Start::init()
 	}
 	else
 	{
-		float x = origin.x - 100;
-		float y = origin.y - 110;
+		float x = origin.x + 140;
+		float y = origin.y + 50;
 		startItem->setPosition(Vec2(x, y));
 	}
 
+	startItem->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+		switch (type)
+		{
+		case ui::Widget::TouchEventType::BEGAN:
+			break;
+		case ui::Widget::TouchEventType::ENDED: {
+			auto MyMap = MyMap::createScene();
+			Director::getInstance()->pushScene(TransitionFade::create(0.5, MyMap, Color3B(255, 255, 255)));
+		}
+			break;
+		default:
+			break;
+		}
+	});
+	this->addChild(startItem);
+
 	/* 关闭游戏按钮 */
-	auto closeItem = MenuItemImage::create("EndButton.png",
-		"EndButton.png", CC_CALLBACK_1(Start::menuCloseCallback, this));
+	auto closeItem = Button::create("EndButton.png", "EndButton_selected.png");
 
 	if (closeItem == nullptr
 		|| closeItem->getContentSize().width <= 0
@@ -81,14 +96,40 @@ bool Start::init()
 	}
 	else
 	{
-		float x = origin.x + 40;
-		float y = origin.y - 110;
+		float x = origin.x + visibleSize.width-145;
+		float y = origin.y + 50;
 		closeItem->setPosition(Vec2(x, y));
 	}
 
+	closeItem->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+		switch (type)
+		{
+		case ui::Widget::TouchEventType::BEGAN:
+			break;
+		case ui::Widget::TouchEventType::ENDED: {
+			// 关闭页面，退出游戏
+			Director::getInstance()->end();
+
+			#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+				exit(0);
+			#endif
+
+			/*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
+
+			//EventCustom customEndEvent("game_scene_close_event");
+			//_eventDispatcher->dispatchEvent(&customEndEvent);
+		}
+			break;
+		default:
+			break;
+		}
+	});
+	this->addChild(closeItem);
+
 	/* 开启声音按钮 */
-	auto soundItem = MenuItemImage::create("SoundButton.png",
-		"SoundButton.png", CC_CALLBACK_1(Start::openAndCloseSound, this));
+	auto soundItem = MenuItemToggle::createWithCallback(CC_CALLBACK_1(Start::openAndCloseSound, this),
+		MenuItemImage::create("SoundButton.png","SoundButton.png"),
+		MenuItemImage::create("SoundCloseButton.png", "SoundCloseButton.png"),nullptr);
 
 	if (soundItem == nullptr
 		|| soundItem->getContentSize().width <= 0
@@ -101,52 +142,13 @@ bool Start::init()
 		soundItem->setPosition(Vec2(origin.x + 170, origin.y + 120));
 	}
 
-	// 声音关闭按钮
-	auto soundCloseItem = MenuItemImage::create("SoundCloseButton.png",
-		"SoundCloseButton.png", CC_CALLBACK_1(Start::openAndCloseSound, this));
-
-	if (soundCloseItem == nullptr
-		|| soundCloseItem->getContentSize().width <= 0
-		|| soundCloseItem->getContentSize().height <= 0)
-	{
-		problemLoading("'SoundCloseButton.png'");
-	}
-	else
-	{
-		soundCloseItem->setPosition(Vec2(origin.x + 170, origin.y + 120));
-	}
-
 	// 创建菜单
 	Vector<MenuItem*> MenuItems;
-	MenuItems.pushBack(startItem);
-	MenuItems.pushBack(closeItem);
 	MenuItems.pushBack(soundItem);
 	auto menu = Menu::createWithArray(MenuItems);
 	this->addChild(menu, 1);
 
 	return true;
-}
-
-
-void Start::menuCloseCallback(Ref* pSender)
-{
-	// 关闭页面，退出游戏
-	Director::getInstance()->end();
-
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	exit(0);
-#endif
-
-	/*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
-
-	//EventCustom customEndEvent("game_scene_close_event");
-	//_eventDispatcher->dispatchEvent(&customEndEvent);
-}
-
-void Start::menuItemSettingCallback(Ref *pSender)
-{
-	auto MyMap = MyMap::createScene();
-	Director::getInstance()->pushScene(MyMap);
 }
 
 void Start::openAndCloseSound(Ref *pSender)

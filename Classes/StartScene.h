@@ -10,10 +10,6 @@ public:
 
 	virtual bool init();
 
-	// 退出游戏函数
-	void menuCloseCallback(Ref* pSender);
-	// 进入下一界面
-	void menuItemSettingCallback(Ref *pSender);
 	// 开启和关闭声音
 	void openAndCloseSound(Ref *pSender);
 	// implement the "static create()" method manually

@@ -1,12 +1,14 @@
-ï»¿#include "BackgroundMusic.h"
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "GameScene.h"
 #include "Gamepause.h"
 #include "GameEnd.h"
 #include "GBKtoUTF-8.h"
+#include "Tower_kind.h"
 
 USING_NS_CC;
+using namespace std;
+int current_gold_coins = 15;
 
 Scene* Game_one::createScene()
 {
@@ -15,7 +17,7 @@ Scene* Game_one::createScene()
 	scene->addChild(layer);
 	return scene;
 }
-// æ‰¾ä¸åˆ°æ–‡ä»¶æ—¶æŠ›å‡ºå¼‚å¸¸
+// ÕÒ²»µ½ÎÄ¼şÊ±Å×³öÒì³£
 static void problemLoading(const char* filename)
 {
 	printf("Error while loading: %s\n", filename);
@@ -43,6 +45,8 @@ std::string GBKToUTF8(const std::string& strGBK)
 extern bool map_two_unlock;
 extern bool map_one_continue;
 
+
+
 bool Game_one::init()
 {
 	if (!Scene::init())
@@ -55,7 +59,7 @@ bool Game_one::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	// åŠ å…¥èƒŒæ™¯å›¾ç‰‡
+	// ¼ÓÈë±³¾°Í¼Æ¬
 	auto map_one = Sprite::create("GameBackground_one.png");
 	if (map_one == nullptr)
 	{
@@ -68,7 +72,7 @@ bool Game_one::init()
 		this->addChild(map_one, 0);
 	}
 
-	// åŠ å…¥ä¸Šè¾¹æ å›¾ç‰‡
+	// ¼ÓÈëÉÏ±ßÀ¸Í¼Æ¬
 	auto upperboard = Sprite::create("Upperboard.png");
 	if (upperboard == nullptr)
 	{
@@ -77,36 +81,11 @@ bool Game_one::init()
 	else
 	{
 		upperboard->setPosition(Vec2(origin.x + visibleSize.width / 2,
-			origin.y + visibleSize.height- upperboard->getContentSize().height/2));
+			origin.y + visibleSize.height - upperboard->getContentSize().height / 2));
 		this->addChild(upperboard, 1);
 	}
 
-	// åŠ å…¥é‡‘å¸å›¾ç‰‡
-	auto moneypic = Sprite::create("Money.png");
-	if (moneypic == nullptr)
-	{
-		problemLoading("'Money.png'");
-	}
-	else
-	{
-		moneypic->setPosition(Vec2(origin.x+22, origin.y+ visibleSize.height-15));
-		this->addChild(moneypic, 2);
-	}
-
-	// æ·»åŠ æ–‡å­—
-	auto mapnum = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 18);
-	if (mapnum == nullptr)
-	{
-		problemLoading("'fonts/Marker Felt.ttf'");
-	}
-	else
-	{
-		mapnum->setPosition(Vec2(origin.x + 43, origin.y + visibleSize.height - 17));
-		this->addChild(mapnum, 2);
-	}
-	mapnum->setColor(Color3B(255, 255, 0));
-
-	// æš‚åœåŠŸèƒ½
+	// ÔİÍ£¹¦ÄÜ
 	auto pauseItem = MenuItemImage::create("Pause.png",
 		"Pause.png", CC_CALLBACK_1(Game_one::Pause, this));
 
@@ -121,7 +100,7 @@ bool Game_one::init()
 		pauseItem->setPosition(Vec2(origin.x + 160, origin.y + 143));
 	}
 
-	// è¿”å›æŒ‰é’®
+	// ·µ»Ø°´Å¥
 	auto returnItem = MenuItemImage::create("Return.png",
 		"Return.png", CC_CALLBACK_1(Game_one::Success, this));
 
@@ -138,36 +117,32 @@ bool Game_one::init()
 		returnItem->setPosition(Vec2(x, y));
 	}
 
-	// åˆ›å»ºèœå•
+	// ´´½¨²Ëµ¥
 	Vector<MenuItem*> MenuItems;
 	MenuItems.pushBack(pauseItem);
 	MenuItems.pushBack(returnItem);
 	auto menu = Menu::createWithArray(MenuItems);
-	this->addChild(menu, 2);
+	this->addChild(menu, 1);
 
-	// æ·»åŠ é¼ æ ‡ä½ç½®æ˜¾ç¤º
-	auto mouseListener = EventListenerMouse::create();
-	mouseListener->onMouseDown = CC_CALLBACK_1(Game_one::onMouseDown, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
-	// æ·»åŠ  "carrot" å›¾ç‰‡
+	// Ìí¼Ó "carrot" Í¼Æ¬
 	auto carrot = Sprite::create("carrot.png");
 	if (carrot)
 	{
-		carrot->setPosition(Vec2(86, 248)); //èåœä½ç½®
+		carrot->setPosition(Vec2(86, 248)); //ÂÜ²·Î»ÖÃ
 		this->addChild(carrot, 1);
 
 		auto CarrotHealthBack = Sprite::create("CarrotHealthBack.png");
-		CarrotHealthBack->setPosition(Vec2(86, 273));// èåœä¸Šæ–¹ä½ç½®
+		CarrotHealthBack->setPosition(Vec2(86, 278));// ÂÜ²·ÉÏ·½Î»ÖÃ
 		this->addChild(CarrotHealthBack, 1);
 
-		// æ·»åŠ èåœè¡€æ¡
+		// Ìí¼ÓÂÜ²·ÑªÌõ
 		ProgressTimer* healthBar = ProgressTimer::create(Sprite::create("HealthBar.png"));
 		healthBar->setType(ProgressTimer::Type::BAR);
 		healthBar->setMidpoint(Vec2(0, 0.5));
 		healthBar->setBarChangeRate(Vec2(1, 0));
-		healthBar->setPosition(Vec2(86, 273));  // èåœä¸Šæ–¹ä½ç½®
-		healthBar->setPercentage(100.0f);  // åˆå§‹è¡€é‡ç™¾åˆ†æ¯”
+		healthBar->setPosition(Vec2(86, 278));  // ÂÜ²·ÉÏ·½Î»ÖÃ
+		healthBar->setPercentage(100.0f);  // ³õÊ¼ÑªÁ¿°Ù·Ö±È
 		this->addChild(healthBar, 2, "healthBar");
 	}
 	else
@@ -175,11 +150,11 @@ bool Game_one::init()
 		problemLoading("'carrot.png'");
 	}
 
-	//æ·»åŠ å‡ºæ€ªç‰Œå›¾ç‰‡
+	//Ìí¼Ó³ö¹ÖÅÆÍ¼Æ¬
 	auto GuideBoard = Sprite::create("GuideBoard.png");
 	if (GuideBoard)
 	{
-		GuideBoard->setPosition(Vec2(433, 75)); //å‡ºæ€ªç‰Œä½ç½®
+		GuideBoard->setPosition(Vec2(433, 75)); //³ö¹ÖÅÆÎ»ÖÃ
 		this->addChild(GuideBoard, 1);
 	}
 	else
@@ -187,8 +162,8 @@ bool Game_one::init()
 		problemLoading("'GuideBoard.png'");
 	}
 
-	// æ·»åŠ æ–‡å­—
-	auto countdown = Label::createWithTTF(GBKToUTF8("5ç§’åæ€ªç‰©æ¥è¢­"), "fonts/STHUPO.TTF", 10);
+	// Ìí¼ÓÎÄ×Ö
+	auto countdown = Label::createWithTTF(GBKToUTF8("5Ãëºó¹ÖÎïÀ´Ï®"), "fonts/STHUPO.TTF", 10);
 	if (countdown == nullptr)
 	{
 		problemLoading("'fonts/STHUPO.TTF'");
@@ -196,23 +171,72 @@ bool Game_one::init()
 	else
 	{
 		countdown->setPosition(Vec2(origin.x + visibleSize.width / 2,
-			origin.y + visibleSize.height - countdown->getContentSize().height-4));
+			origin.y + visibleSize.height - countdown->getContentSize().height - 4));
 		this->addChild(countdown, 2);
 	}
 	countdown->setColor(Color3B(255, 255, 255));
 
+	//ÏÔÊ¾²à±ßµÄ·ÀÓùËş0
+	createTower0("tower_zero0.png", "tower_back0.png", "tower_zero.png", "tower_back.png", tower0_upgrade_coins[0], 230, 0);
+
+	//ÏÔÊ¾²à±ßµÄ·ÀÓùËş1
+	createTower0("tower_one0.png", "tower_back0.png", "tower_one.png", "tower_back.png", tower1_upgrade_coins[0], 185, 1);
+
+	//ÏÔÊ¾²à±ßµÄ·ÀÓùËş2
+	createTower0("tower_two0.png", "tower_back0.png", "tower_two.png", "tower_back.png", tower2_upgrade_coins[0], 140, 2);
+
+	//ÏÔÊ¾²à±ßµÄ·ÀÓùËş3
+	createTower0("tower_three0.png", "tower_back0.png", "tower_three.png", "tower_back.png", tower3_upgrade_coins[0], 95, 3);
+
+	//³õÊ¼»¯½ğ±Ò²»×ãµÄ±êÇ©
+	insufficientGoldLabel = Label::createWithTTF("not enough gold coins!", "fonts/Marker Felt.ttf", 14);
+	insufficientGoldLabel->setColor(Color3B(255, 0, 0));  // ºìÉ«
+	insufficientGoldLabel->setVisible(false);  // ³õÊ¼Ê±ÉèÖÃÎª²»¿É¼û
+	insufficientGoldLabel->setPosition(Vec2(90,60));//ÉèÖÃÎ»ÖÃ
+	this->addChild(insufficientGoldLabel, 1);
+
+	// ¼ÓÈë½ğ±ÒÍ¼Æ¬
+	auto moneypic = Sprite::create("Money.png");
+	if (moneypic == nullptr)
+	{
+		problemLoading("'Money.png'");
+	}
+	else
+	{
+		moneypic->setPosition(Vec2(origin.x + 16, origin.y + visibleSize.height - 16));
+		this->addChild(moneypic, 1);
+	}
+
+	// Ìí¼ÓÎÄ×Ö ½ğ±ÒÊıÁ¿
+	auto mapnum = Label::createWithTTF(to_string(current_gold_coins), "fonts/Marker Felt.ttf", 18);
+	if (mapnum == nullptr)
+	{
+		problemLoading("'fonts/Marker Felt.ttf'");
+	}
+	else
+	{
+		mapnum->setPosition(Vec2(origin.x + 40, origin.y + visibleSize.height - 18));
+		this->addChild(mapnum, 1);
+	}
+	mapnum->setColor(Color3B(255, 255, 0));
+
+	// Ìí¼ÓÊó±êÎ»ÖÃÏÔÊ¾
+	auto mouseListener = EventListenerMouse::create();
+	mouseListener->onMouseDown = CC_CALLBACK_1(Game_one::onMouseDown, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
+
 	return true;
 }
 
-// æš‚åœæ¸¸æˆ
+// ÔİÍ£ÓÎÏ·
 void Game_one::Pause(Ref* pSender)
 {
-	// å¾—åˆ°çª—å£çš„å¤§å°
+	// µÃµ½´°¿ÚµÄ´óĞ¡
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	RenderTexture *renderTexture = RenderTexture::create(visibleSize.width+48, visibleSize.height);
 
-	// éå†å½“å‰ç±»çš„æ‰€æœ‰å­èŠ‚ç‚¹ä¿¡æ¯ï¼Œç”»å…¥renderTextureä¸­ã€‚
-	// è¿™é‡Œç±»ä¼¼æˆªå›¾ã€‚
+	// ±éÀúµ±Ç°ÀàµÄËùÓĞ×Ó½ÚµãĞÅÏ¢£¬»­ÈërenderTextureÖĞ¡£
+	// ÕâÀïÀàËÆ½ØÍ¼¡£
 	renderTexture->begin();
 	this->getParent()->visit();
 	renderTexture->end();
@@ -220,17 +244,17 @@ void Game_one::Pause(Ref* pSender)
 	Director::getInstance()->pushScene(Gamepause::scene(renderTexture));
 }
 
-// æ¸¸æˆé€šå…³
+// ÓÎÏ·Í¨¹Ø
 void Game_one::Success(Ref* pSender)
 {
 	map_two_unlock = true;
 
-	// å¾—åˆ°çª—å£çš„å¤§å°
+	// µÃµ½´°¿ÚµÄ´óĞ¡
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	RenderTexture *renderTexture = RenderTexture::create(visibleSize.width + 48, visibleSize.height);
 
-	// éå†å½“å‰ç±»çš„æ‰€æœ‰å­èŠ‚ç‚¹ä¿¡æ¯ï¼Œç”»å…¥renderTextureä¸­ã€‚
-	// è¿™é‡Œç±»ä¼¼æˆªå›¾ã€‚
+	// ±éÀúµ±Ç°ÀàµÄËùÓĞ×Ó½ÚµãĞÅÏ¢£¬»­ÈërenderTextureÖĞ¡£
+	// ÕâÀïÀàËÆ½ØÍ¼¡£
 	renderTexture->begin();
 	this->getParent()->visit();
 	renderTexture->end();
@@ -238,29 +262,154 @@ void Game_one::Success(Ref* pSender)
 	Director::getInstance()->pushScene(GameEnd::scene(renderTexture));
 }
 
-// é¼ æ ‡ç‚¹å‡»äº‹ä»¶å›è°ƒ
+// Êó±êµã»÷ÊÂ¼ş»Øµ÷
 void Game_one::onMouseDown(EventMouse* event)
 {
-	// è·å–é¼ æ ‡ç‚¹å‡»ä½ç½®
-	Vec2 mousePosition = Director::getInstance()->getRunningScene()->convertToNodeSpace(event->getLocationInView());
+	// »ñÈ¡Êó±êµã»÷Î»ÖÃ
+	Vec2 mousePosition = this->convertToNodeSpace(event->getLocationInView());
 
-	// è¾“å‡ºé¼ æ ‡ä½ç½®
+	// Êä³öÊó±êÎ»ÖÃ
 	log("Mouse Clicked at (%.2f, %.2f)", mousePosition.x, mousePosition.y);
 
-	// åœ¨å±å¹•ä¸Šæ˜¾ç¤ºé¼ æ ‡ä½ç½®
-	drawMousePositionLabel(mousePosition);
+	int tower0Clicked = checkTower0Clicked(mousePosition);
+
+	// ´¦Àíµã»÷µ½µÄ²à±ß·ÀÓùËş
+	if (tower0Clicked != -1)
+	{
+		switch (tower0Clicked)
+		{
+		case 0:
+		{
+			if (current_gold_coins < tower0_upgrade_coins[0])
+				showInsufficientGoldLabel();
+			break;
+		}
+		case 1:
+		{
+		if (current_gold_coins < tower1_upgrade_coins[0])
+			showInsufficientGoldLabel();
+		break;
+		}
+		case 2:
+		{
+			if (current_gold_coins < tower2_upgrade_coins[0])
+				showInsufficientGoldLabel();
+			break;
+		}
+		case 3:
+		{
+			if (current_gold_coins < tower3_upgrade_coins[0])
+				showInsufficientGoldLabel();
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	else// Èç¹ûÃ»ÓĞµã»÷µ½·ÀÓùËşÔÚÆÁÄ»ÉÏÏÔÊ¾Êó±êÎ»ÖÃ
+	{
+		drawMousePositionLabel(mousePosition);
+	}
 }
 
-// åœ¨å±å¹•ä¸Šæ˜¾ç¤ºé¼ æ ‡ä½ç½®
+// ÔÚÆÁÄ»ÉÏÏÔÊ¾Êó±êÎ»ÖÃ
 void Game_one::drawMousePositionLabel(const Vec2& position)
 {
-	// ç§»é™¤ä¹‹å‰çš„æ ‡ç­¾
+	// ÒÆ³ıÖ®Ç°µÄ±êÇ©
 	removeChildByTag(123);
 
-	// åˆ›å»ºæ ‡ç­¾å¹¶æ˜¾ç¤ºé¼ æ ‡ä½ç½®
+	// ´´½¨±êÇ©²¢ÏÔÊ¾Êó±êÎ»ÖÃ
 	auto label = Label::createWithTTF(StringUtils::format("(%.2f, %.2f)", position.x, position.y),
 		"fonts/arial.ttf", 24);
-	label->setPosition(Vec2(100, 100));
+	label->setPosition(Vec2(120, 60));
 	label->setTag(123);
 	addChild(label);
+}
+
+//Ìí¼Ó²à±ß·ÀÓùËşµÄÍ¼±ê
+void Game_one::createTower0(const std::string& tower0Image, const std::string& tower0BackImage,
+	const std::string& towerImage, const std::string& towerBackImage,
+	int upgradeCoins, float positionY, int index)
+{
+	// ÏÔÊ¾²à±ßµÄ·ÀÓùËş0
+	auto tower0 = Sprite::create(tower0Image);
+	if (tower0)
+	{
+		auto tower_back0 = Sprite::create(tower0BackImage);
+		tower_back0->setPosition(Vec2(42, positionY));
+		this->addChild(tower_back0, 1);  // ·ÀÓùËş±³¾°
+		tower0->setPosition(Vec2(42, positionY));  // ²à±ß·ÀÓùËşÎ»ÖÃ
+		this->addChild(tower0, 1);
+
+		// ÅĞ¶Ï½ğ±ÒÊÇ·ñ×ã¹»¹ºÂò·ÀÓùËş
+		if (current_gold_coins >= upgradeCoins)
+		{
+			auto tower = Sprite::create(towerImage);
+			if (tower)
+			{
+				auto tower_back = Sprite::create(towerBackImage);
+				tower_back->setPosition(Vec2(42, positionY));
+				this->addChild(tower_back, 1);  // ·ÀÓùËş±³¾°
+				tower->setPosition(Vec2(42, positionY));  // ²à±ß·ÀÓùËşÎ»ÖÃ
+				this->addChild(tower, 1);
+			}
+			else
+			{
+				//problemLoading("'" + towerImage + "'");
+			}
+		}
+		else
+		{
+			//problemLoading("'" + towerImage + "' (Not enough gold coins)");
+		}
+
+		Label* build = Label::createWithTTF(to_string(upgradeCoins), "fonts/Marker Felt.ttf", 13);  // Ìí¼ÓÎÄ×Ö£¬ĞèÒªÏûºÄµÄ½ğ±ÒÊıÁ¿
+		if (build == nullptr)
+			problemLoading("'fonts/Marker Felt.ttf'");
+		else
+		{
+			build->setPosition(Vec2(63, positionY - 12));  // Ìí¼ÓµÄ·ÀÓùËş½¨ÔìËùĞèÒªµÄÇ®µÄÎ»ÖÃ
+			this->addChild(build, 1);
+		}
+		build->setColor(Color3B(0, 0, 0));  // ºÚÉ«
+	}
+	else
+	{
+		//problemLoading("'" + tower0Image + "'");
+	}
+}
+
+// ÊÇ·ñµã»÷µ½²à±ßµÄ·ÀÓùËşÁË
+int Game_one::checkTower0Clicked(const Vec2& touchLocation)
+{
+	// ¶¨Òå²à±ß·ÀÓùËşµÄÎ»ÖÃºÍ´óĞ¡
+	Rect towerRects[] = {
+		Rect(26, 212, 45, 36),  // ²à±ß·ÀÓùËş0£¬×óÏÂ½Ç×ø±ê£¬ºÍ¿í¶È£¬¸ß¶È
+		Rect(26, 167, 45, 36),  // ²à±ß·ÀÓùËş1
+		Rect(26, 122, 45, 36),  // ²à±ß·ÀÓùËş2
+		Rect(26, 77,  45, 36)   // ²à±ß·ÀÓùËş3
+	};
+
+	for (int i = 0; i < 4; ++i)
+	{
+		if (towerRects[i].containsPoint(touchLocation))
+		{
+			// Èç¹ûµã»÷µ½·ÀÓùËş£¬·µ»Ø·ÀÓùËşµÄÖÖÀàÊıÖµ
+			return i;
+		}
+	}
+
+	// Èç¹ûÃ»ÓĞµã»÷µ½·ÀÓùËş£¬·µ»Ø-1
+	return -1;
+}
+
+// ÏÔÊ¾½ğ±Ò²»×ã£¬1ÃëºóÏûÊ§
+void Game_one::showInsufficientGoldLabel()
+{
+	insufficientGoldLabel->setVisible(true);
+
+	// Ê¹ÓÃ¶¨Ê±Æ÷ÑÓ³Ù1ÃëºóÒş²Ø±êÇ©
+	this->scheduleOnce([this](float dt) {
+		insufficientGoldLabel->setVisible(false);
+	}, 1.0f, "hideInsufficientGoldLabel");
 }

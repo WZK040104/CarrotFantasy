@@ -1,12 +1,13 @@
-﻿#include "BackgroundMusic.h"
-#include "SimpleAudioEngine.h"
+﻿#include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "GameScene.h"
 #include "Gamepause.h"
 #include "GameEnd.h"
 #include "GBKtoUTF-8.h"
+#include "Tower_kind.h"
 
 USING_NS_CC;
+using namespace std;
 
 Scene* Game_two::createScene()
 {
@@ -62,7 +63,19 @@ bool Game_two::init()
 		this->addChild(upperboard, 1);
 	}
 
-	// 加入金币图片
+	//显示侧边的防御塔0
+	createTower0("tower_zero0.png", "tower_back0.png", "tower_zero.png", "tower_back.png", tower0_upgrade_coins[0], 230, 0);
+
+	//显示侧边的防御塔1
+	createTower0("tower_one0.png", "tower_back0.png", "tower_one.png", "tower_back.png", tower1_upgrade_coins[0], 185, 1);
+
+	//显示侧边的防御塔2
+	createTower0("tower_two0.png", "tower_back0.png", "tower_two.png", "tower_back.png", tower2_upgrade_coins[0], 140, 2);
+
+	//显示侧边的防御塔3
+	createTower0("tower_three0.png", "tower_back0.png", "tower_three.png", "tower_back.png", tower3_upgrade_coins[0], 95, 3);
+
+									   // 加入金币图片
 	auto moneypic = Sprite::create("Money.png");
 	if (moneypic == nullptr)
 	{
@@ -74,8 +87,8 @@ bool Game_two::init()
 		this->addChild(moneypic, 2);
 	}
 
-	// 添加文字
-	auto mapnum = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 18);
+	// 添加文字 金币数量
+	auto mapnum = Label::createWithTTF(to_string(current_gold_coins), "fonts/Marker Felt.ttf", 18);
 	if (mapnum == nullptr)
 	{
 		problemLoading("'fonts/Marker Felt.ttf'");
@@ -226,7 +239,6 @@ void Game_two::onMouseDown(EventMouse* event)
 	// 输出鼠标位置
 	log("Mouse Clicked at (%.2f, %.2f)", mousePosition.x, mousePosition.y);
 
-	// 在屏幕上显示鼠标位置
 	drawMousePositionLabel(mousePosition);
 }
 
@@ -242,4 +254,56 @@ void Game_two::drawMousePositionLabel(const Vec2& position)
 	label->setPosition(Vec2(100, 100));
 	label->setTag(123);
 	addChild(label);
+}
+
+void Game_two::createTower0(const std::string& tower0Image, const std::string& tower0BackImage,
+	const std::string& towerImage, const std::string& towerBackImage,
+	int upgradeCoins, float positionY, int index)
+{
+	// 显示侧边的防御塔0
+	auto tower0 = Sprite::create(tower0Image);
+	if (tower0)
+	{
+		auto tower_back0 = Sprite::create(tower0BackImage);
+		tower_back0->setPosition(Vec2(42, positionY));
+		this->addChild(tower_back0, 1);  // 防御塔背景
+		tower0->setPosition(Vec2(42, positionY));  // 侧边防御塔位置
+		this->addChild(tower0, 1);
+
+		// 判断金币是否足够购买防御塔
+		if (current_gold_coins >= upgradeCoins)
+		{
+			auto tower = Sprite::create(towerImage);
+			if (tower)
+			{
+				auto tower_back = Sprite::create(towerBackImage);
+				tower_back->setPosition(Vec2(42, positionY));
+				this->addChild(tower_back, 1);  // 防御塔背景
+				tower->setPosition(Vec2(42, positionY));  // 侧边防御塔位置
+				this->addChild(tower, 1);
+			}
+			else
+			{
+				//problemLoading("'" + towerImage + "'");
+			}
+		}
+		else
+		{
+			//problemLoading("'" + towerImage + "' (Not enough gold coins)");
+		}
+
+		Label* build = Label::createWithTTF(to_string(upgradeCoins), "fonts/Marker Felt.ttf", 13);  // 添加文字，需要消耗的金币数量
+		if (build == nullptr)
+			problemLoading("'fonts/Marker Felt.ttf'");
+		else
+		{
+			build->setPosition(Vec2(63, positionY - 12));  // 添加的防御塔建造所需要的钱的位置
+			this->addChild(build, 1);
+		}
+		build->setColor(Color3B(0, 0, 0));  // 黑色
+	}
+	else
+	{
+		//problemLoading("'" + tower0Image + "'");
+	}
 }

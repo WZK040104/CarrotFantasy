@@ -5,6 +5,8 @@
 #include "GameScene.h"
 #include "GameEnd.h"
 
+using namespace cocos2d::ui;
+
 USING_NS_CC;
 
 Scene* MyMap::createScene()
@@ -88,8 +90,7 @@ bool MyMap::init()
 	}
 
 	/* 地图一 */
-	auto map_one = MenuItemImage::create("Map_one.png",
-		"Map_one.png", CC_CALLBACK_1(MyMap::menuItemSettingCallback_one, this));
+	auto map_one = Button::create("Map_one.png", "Map_one_selected.png");
 
 	if (map_one == nullptr
 		|| map_one->getContentSize().width <= 0
@@ -99,11 +100,28 @@ bool MyMap::init()
 	}
 	else
 	{
-		float x = origin.x;
-		float y = origin.y;
-		map_one->setPosition(Vec2(origin.x - 125, origin.y - 20));
+		float x = origin.x + 115;
+		float y = origin.y + 140;
+		map_one->setPosition(Vec2(x, y));
 	}
 
+	map_one->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+		switch (type)
+		{
+		case ui::Widget::TouchEventType::BEGAN:
+			break;
+		case ui::Widget::TouchEventType::ENDED: {
+			auto Game_one = Game_one::createScene();
+			Director::getInstance()->pushScene(TransitionFade::create(0.5, Game_one, Color3B(255, 255, 255)));
+		}
+			break;
+		default:
+			break;
+		}
+	});
+	this->addChild(map_one);
+
+	/* 是否完成与是否解锁的标志 */
 	if (map_one_finish) {
 		auto finish_one = Sprite::create("Finish.png");
 		if (finish_one == nullptr)
@@ -126,8 +144,7 @@ bool MyMap::init()
 	}
 
 	/* 地图二 */
-	auto map_two = MenuItemImage::create("Map_two.png",
-		"Map_two.png", CC_CALLBACK_1(MyMap::menuItemSettingCallback_two, this));
+	auto map_two = Button::create("Map_two.png", "Map_two_selected.png", "Map_two_unlocked.png");
 
 	if (map_two == nullptr
 		|| map_two->getContentSize().width <= 0
@@ -137,11 +154,33 @@ bool MyMap::init()
 	}
 	else
 	{
-		float x = origin.x;
-		float y = origin.y;
-		map_two->setPosition(Vec2(origin.x + 75, origin.y - 20));
+		float x = origin.x + visibleSize.width - 108;
+		float y = origin.y + 140;
+		map_two->setPosition(Vec2(x, y));
 	}
 
+	if (!map_two_unlock) {
+		map_two->setBright(false);
+		map_two->setTouchEnabled(false);
+	}
+	
+	map_two->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+		switch (type)
+		{
+		case ui::Widget::TouchEventType::BEGAN:
+			break;
+		case ui::Widget::TouchEventType::ENDED: {
+			auto Game_two = Game_two::createScene();
+			Director::getInstance()->pushScene(TransitionFade::create(0.5, Game_two, Color3B(255, 255, 255)));
+		}
+			break;
+		default:
+			break;
+		}
+	});
+	this->addChild(map_two);
+
+	/* 是否完成与是否解锁的标志 */
 	if (map_two_unlock) {
 		if (map_two_finish) {
 			auto finish_two = Sprite::create("Finish.png");
@@ -178,8 +217,6 @@ bool MyMap::init()
 	// 创建菜单
 	Vector<MenuItem*> MenuItems;
 	MenuItems.pushBack(returnItem);
-	MenuItems.pushBack(map_one);
-	MenuItems.pushBack(map_two);
 	auto menu = Menu::createWithArray(MenuItems);
 	this->addChild(menu, 1);
 
@@ -190,20 +227,4 @@ bool MyMap::init()
 void MyMap::menuOkCallback(Ref *pSender)
 {
 	Director::getInstance()->popScene();
-}
-
-// 进入地图一
-void MyMap::menuItemSettingCallback_one(Ref *pSender)
-{
-	auto Game_one = Game_one::createScene();
-	Director::getInstance()->pushScene(Game_one);
-}
-
-// 进入地图二
-void MyMap::menuItemSettingCallback_two(Ref *pSender)
-{
-	if (map_two_unlock) {
-		auto Game_two = Game_two::createScene();
-		Director::getInstance()->pushScene(Game_two);
-	}
 }

@@ -1,12 +1,12 @@
 #include "Enemy_kind.h"
 
 Enemy0::Enemy0() {
-	initial(1000, 8, 100,0,0);//暂时先写为0,0
+	initial(1000, 8, 100, 0.0, 0.0);//暂时先写为0,0
 }
 Enemy0::~Enemy0() {}
 
 Enemy1::Enemy1() {
-	initial(30, 10, 10,0, 0);
+	initial(30, 10, 10, 0, 0);
 }
 Enemy1::~Enemy1() {}
 

@@ -62,3 +62,23 @@ public:
 		}
 	}
 };
+
+extern int tower0_upgrade_coins[MAXlevel];
+extern int tower0_attack[MAXlevel + 1];
+extern double tower0_timebetween_attack[MAXlevel + 1];
+extern double tower0_attack_range[MAXlevel + 1];
+
+extern int tower1_upgrade_coins[MAXlevel];
+extern int tower1_attack[MAXlevel + 1];
+extern double tower1_timebetween_attack[MAXlevel + 1];
+extern double tower1_attack_range[MAXlevel + 1];
+
+extern int tower2_upgrade_coins[MAXlevel];
+extern int tower2_attack[MAXlevel + 1];
+extern double tower2_timebetween_attack[MAXlevel + 1];
+extern double tower2_attack_range[MAXlevel + 1];
+
+extern int tower3_upgrade_coins[MAXlevel];
+extern int tower3_attack[MAXlevel + 1];
+extern double tower3_timebetween_attack[MAXlevel + 1];
+extern double tower3_attack_range[MAXlevel + 1];
