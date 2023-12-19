@@ -12,12 +12,16 @@ void CTower::setPosition(int x, int y)
 	tower_position_y = y;
 }
 
+int CTower::getType()const
+{
+	return Type;
+}
 //获取防御塔位置
-int CTower::getPositionX() const
+double CTower::getPositionX()
 {
 	return tower_position_x;
 }
-int CTower::getPositionY() const
+double CTower::getPositionY()
 {
 	return tower_position_y;
 }
@@ -59,7 +63,7 @@ void CTower::upgrade(int & gold_coins)
 }
 
 //敌人是否在攻击范围内
-bool CTower::inRange(const CEnemy& enemy) const
+bool CTower::inRange(const CEnemy& enemy)
 {
 	if ((enemy.EnemyPositionX() - getPositionX()) * (enemy.EnemyPositionX() - getPositionX()) + 
 		(enemy.EnemyPositionY() - getPositionY()) * (enemy.EnemyPositionY() - getPositionY()) 
@@ -90,7 +94,7 @@ CEnemy* nearestEnemy(vector<CEnemy*>& enemy, int positionx,int positiony)
 	}
 
 	CEnemy* nearest = enemy[0];
-	for (int i = 1; i < enemy.size(); i++)
+	for (unsigned int i = 1; i < enemy.size(); i++)
 	{
 		if ((enemy[i]->EnemyPositionX() - positionx) * (enemy[i]->EnemyPositionX() - positionx) 
 			+ (enemy[i]->EnemyPositionY() - positiony) * (enemy[i]->EnemyPositionY() - positiony) 

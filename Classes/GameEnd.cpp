@@ -4,6 +4,8 @@
 
 USING_NS_CC;
 
+extern int countnum;
+
 Scene* GameEnd::scene(RenderTexture* sqr)
 {
 	Scene *scene = Scene::create();
@@ -68,6 +70,7 @@ bool GameEnd::init()
 // 继续下一关卡
 void GameEnd::ContinueGame(Ref *pSender)
 {
+	countnum = 20;
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
@@ -92,6 +95,7 @@ void GameEnd::ContinueGame(Ref *pSender)
 // 返回菜单
 void GameEnd::ReturnMenuGame(Ref *pSender)
 {
+	countnum = 20;
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();

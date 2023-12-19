@@ -1,12 +1,14 @@
 #pragma once
 #include "CEnemy.h"
 #include <vector>
+#include"cocos2d.h"
 #define MAXlevel 4
 using namespace std;
 
 class CTower	//防御塔属性
 {
 private:
+	int Type;								//种类
 	int tower_level;						//等级
 	int coins_to_level_up[MAXlevel];		//升级需要的金币
 	int damage_per_time[MAXlevel+1];		//每次攻击的伤害
@@ -15,8 +17,9 @@ private:
 	int tower_position_x;					//建筑的横坐标
 	int tower_position_y;					//建筑的纵坐标
 	double last_attack_Time;				// 上一次攻击时间
-
 	bool group_damage;
+
+	
 public:
 	// 构造函数
 	CTower()
@@ -63,15 +66,15 @@ public:
 	void upgrade(int& gold_coins);	//升级
 	virtual void attack(vector<CEnemy>& enemy,int damage_per_time);	//攻击
 	void setPosition(int x, int y);	//建筑安放坐标
+	int getType() const;			//获取种类
 	int getLevel() const;			//获取等级
 	int getDamage() const;			//获取伤害
 	int getAttackRange() const;		//获取攻击范围
-	bool inRange(const CEnemy& enemy) const;//敌人是否在范围内
+	bool inRange(const CEnemy& enemy);//敌人是否在范围内
 	int getUpgradeCost() const;		//获取升级需要的钱
-	int getPositionX() const;		//获取x坐标
-	int getPositionY() const;		//获取y坐标
+	double getPositionX();		//获取x坐标
+	double getPositionY();		//获取y坐标
 	double getTimeCooldown() const;	//获取冷却时间
 	void resetCooldown();			//冷却时间
 	double get_last_attack_Time();	//上次攻击时间
 };
-

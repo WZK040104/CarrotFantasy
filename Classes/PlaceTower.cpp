@@ -1,6 +1,8 @@
 #include"CTower.h"
 #include"Tower_kind.h"
 #include<vector>
+#include"cocos2d.h"
+
 using namespace std;
 
 vector<CTower> TowerExist;
