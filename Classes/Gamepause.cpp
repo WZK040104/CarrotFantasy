@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "Gamepause.h"
 #include "Externgame.h"
+#include "PlaceTower.h"
 
 USING_NS_CC;
 
@@ -77,6 +78,7 @@ void Gamepause::ContinueGame(Ref *pSender)
 // 重新开始
 void Gamepause::RestartGame(Ref *pSender)
 {
+	TowerExist.clear();
 	countnum = 20;
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
@@ -93,6 +95,7 @@ void Gamepause::RestartGame(Ref *pSender)
 // 返回菜单
 void Gamepause::ReturnMenuGame(Ref *pSender)
 {
+	TowerExist.clear();
 	countnum = 20;
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();

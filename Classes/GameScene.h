@@ -41,6 +41,8 @@ public:
 	cocos2d::Label* insufficientGoldLabel;
 	// 放置位置错误的标
 	cocos2d::Label* insufficientPlaceLabel;
+	// 等级已满的标
+	cocos2d::Label* insufficientLevelLabel;
 	// 可放置位置边框
 	cocos2d::Sprite* board[25];
 	// 防御塔可放置位置
@@ -54,6 +56,8 @@ public:
 	void showInsufficientGoldLabel();
 	// 显示放置位置错误
 	void showInsufficientPlaceLabel();
+	// 显示等级已满
+	void showInsufficientLevelLabel();
 	// 定时器倒数
 	virtual void step(float Dt);
 	// implement the "static create()" method manually
@@ -88,6 +92,8 @@ public:
 	cocos2d::Label* insufficientGoldLabel;
 	// 放置位置错误的标
 	cocos2d::Label* insufficientPlaceLabel;
+	// 等级已满的标
+	cocos2d::Label* insufficientLevelLabel;
 	// 可放置位置边框
 	cocos2d::Sprite* board[30];
 	// 防御塔可放置位置
@@ -102,6 +108,8 @@ public:
 	void showInsufficientGoldLabel();
 	// 显示放置位置错误
 	void showInsufficientPlaceLabel();
+	// 显示等级已满
+	void showInsufficientLevelLabel();
 	// 定时器倒数
 	virtual void step(float Dt);
 	// implement the "static create()" method manually

@@ -131,6 +131,5 @@ void CTower::attack(vector<CEnemy>& enemy, int damage_per_time)
 			target->HP_calculate(getDamage());	// 实施攻击
 			resetCooldown();					// 重置冷却时间
 		}
-		
 	}
 }

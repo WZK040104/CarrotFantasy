@@ -1,6 +1,7 @@
 #include "GameEnd.h"
 #include "GameScene.h"
 #include "MapScene.h"
+#include "PlaceTower.h"
 
 USING_NS_CC;
 
@@ -70,6 +71,7 @@ bool GameEnd::init()
 // 继续下一关卡
 void GameEnd::ContinueGame(Ref *pSender)
 {
+	TowerExist.clear();
 	countnum = 20;
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
@@ -95,6 +97,7 @@ void GameEnd::ContinueGame(Ref *pSender)
 // 返回菜单
 void GameEnd::ReturnMenuGame(Ref *pSender)
 {
+	TowerExist.clear();
 	countnum = 20;
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();

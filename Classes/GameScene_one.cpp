@@ -241,6 +241,13 @@ bool Game_one::init()
 	insufficientPlaceLabel->setPosition(Vec2(90, 60));//设置位置
 	this->addChild(insufficientPlaceLabel, 1);
 
+	// 初始化等级已满的标签
+	insufficientLevelLabel = Label::createWithTTF("reach highest level!", "fonts/Marker Felt.ttf", 14);
+	insufficientLevelLabel->setColor(Color3B(255, 0, 0));  // 红色
+	insufficientLevelLabel->setVisible(false);  // 初始时设置为不可见
+	insufficientLevelLabel->setPosition(Vec2(90, 60));//设置位置
+	this->addChild(insufficientLevelLabel, 1);
+
 	// 防御塔可放置位置边框
 	for (unsigned int i = 1; i <= sizeof(pairxy) / sizeof(pairxy[0]); i++) {
 		board[i] = Sprite::create("board.png");
@@ -250,7 +257,7 @@ bool Game_one::init()
 		}
 		else
 		{
-			board[i]->setPosition(pairxy[i-1]);
+			board[i]->setPosition(pairxy[i - 1]);
 			this->addChild(board[i], 1);
 			board[i]->setVisible(false);
 		}
@@ -316,7 +323,7 @@ void Game_one::Pause(Ref* pSender)
 {
 	// 得到窗口的大小
 	auto visibleSize = Director::getInstance()->getVisibleSize();
-	RenderTexture *renderTexture = RenderTexture::create(visibleSize.width+48, visibleSize.height);
+	RenderTexture *renderTexture = RenderTexture::create(visibleSize.width + 48, visibleSize.height);
 
 	// 遍历当前类的所有子节点信息，画入renderTexture中。
 	// 这里类似截图。
@@ -366,8 +373,10 @@ int Game_one::getTowerUpgradeCoins(int towerType)
 	}
 }
 
+double x, y;
+
 // 处理xy的值
-bool deal_with_xy1(double &x ,double& y)
+bool deal_with_xy1(double &x, double& y)
 {
 	if (x > 102 && x <= 137)
 		x = 120;
@@ -403,7 +412,7 @@ bool deal_with_xy1(double &x ,double& y)
 	else if (y > 228 && y <= 262)
 		y = 245;
 
-	if (x <= 71 && y > 75 && y <= 250)
+	if (x <= 71 && y > 70 && y <= 250)
 		return 0;
 
 	for (unsigned int i = 0; i < TowerExist.size(); i++)
@@ -422,6 +431,10 @@ Vec2 mousePosition;
 void Game_one::onMouseDown(EventMouse* event)
 {
 	mousePosition = this->convertToNodeSpace(event->getLocationInView());
+	cocos2d::Node* layout_delete;
+	cocos2d::Node* layout_uplevel;
+	cocos2d::Node* layout_return;
+
 	if (already == 1)
 	{
 		for (unsigned int i = 1; i <= sizeof(pairxy) / sizeof(pairxy[0]); i++)
@@ -429,11 +442,12 @@ void Game_one::onMouseDown(EventMouse* event)
 			board[i]->setVisible(true);
 		}
 		towerPosition = mousePosition;
-		double x= towerPosition.x, y= towerPosition.y;
-		bool place_success=deal_with_xy1(x, y); // 处理xy坐标，是否成功放置
-		bool it = false;
-		for (unsigned int i = 1; i <= sizeof(pairxy) / sizeof(pairxy[0]); i++){
-			if (pairxy[i-1] == Vec2(x, y)) 
+		x = towerPosition.x;
+		y = towerPosition.y;
+		bool place_success = deal_with_xy1(x, y); // 处理xy坐标，是否合法放置
+		bool it = false; // 处理xy坐标，是否成功放置在点位上
+		for (unsigned int i = 1; i <= sizeof(pairxy) / sizeof(pairxy[0]); i++) {
+			if (pairxy[i - 1] == Vec2(x, y))
 			{
 				it = true;
 				break;
@@ -464,28 +478,200 @@ void Game_one::onMouseDown(EventMouse* event)
 				break;
 			}
 			towerSprite->setPosition(towerPosition);
-			this->addChild(towerSprite, 1,"towerSprite");
-
+			// 每个防御塔及其相关组件都被命名为他们的坐标
+			// 因此可以通过鼠标点击的坐标来找到相应的防御塔
+			char name1[10] = {}, name2[10] = {}, name3[10] = {}, name4[10] = {};
+			sprintf(name1, "%d%d", int(x), int(y));
+			this->addChild(towerSprite, 1, name1);
+			// 退出按钮
+			Button* returnbutton = Button::create("exit.png");
+			sprintf(name4, "%d%d_r", int(x), int(y));
+			returnbutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y-10));
+			this->addChild(returnbutton, 2, name4);
+			returnbutton->setVisible(false);
+			// 删除按钮
+			Button* deletebutton = Button::create("delete.png");
+			sprintf(name2, "%d%d_b", int(x), int(y));
+			deletebutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y));
+			this->addChild(deletebutton, 2, name2);
+			deletebutton->setVisible(false);
+			// 升级按钮
+			Button* levelupbutton = Button::create("levelup.png");
+			sprintf(name3, "%d%d_up", int(x), int(y));
+			levelupbutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y + 10));
+			this->addChild(levelupbutton, 2, name3);
+			levelupbutton->setVisible(false);
+			
+			// 点击防御塔
 			towerSprite->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+				x = mousePosition.x;
+				y = mousePosition.y;
+				deal_with_xy1(x, y);
+
+				char name2[10] = {}, name3[10] = {}, name4[10] = {};
+				sprintf(name2, "%d%d_b", int(x), int(y));
+				auto layout_delete = this->getChildByName(name2);
+
+				sprintf(name3, "%d%d_up", int(x), int(y));
+				layout_uplevel = this->getChildByName(name3);
+
+				sprintf(name4, "%d%d_r", int(x), int(y));
+				layout_return = this->getChildByName(name4);
+
+				switch (type)
+				{
+				case ui::Widget::TouchEventType::BEGAN:
+					break;
+				case ui::Widget::TouchEventType::ENDED:
+					// 点击防御塔，则将删除和升级按钮设为可见
+					layout_delete->setVisible(true);
+					layout_uplevel->setVisible(true);
+					layout_return->setVisible(true);
+					break;
+				default:
+					break;
+				}
+			});
+
+			// 点击返回按钮
+			returnbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+				x = mousePosition.x;
+				y = mousePosition.y;
+				deal_with_xy1(x, y);
+
+				char name2[10] = {}, name3[10] = {}, name4[10] = {};
+				sprintf(name2, "%d%d_b", int(x), int(y));
+				layout_delete = this->getChildByName(name2);
+
+				sprintf(name3, "%d%d_up", int(x), int(y));
+				layout_uplevel = this->getChildByName(name3);
+
+				sprintf(name4, "%d%d_r", int(x), int(y));
+				layout_return = this->getChildByName(name4);
+
+				switch (type)
+				{
+				case ui::Widget::TouchEventType::BEGAN:
+					break;
+				case ui::Widget::TouchEventType::ENDED:
+					// 点击退出按钮，则将删除和升级按钮设为不可见
+					layout_return->setVisible(false);
+					layout_delete->setVisible(false);
+					layout_uplevel->setVisible(false);
+					break;
+				default:
+					break;
+				}
+			});
+
+			// 点击删除按钮
+			deletebutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+				x = mousePosition.x;
+				y = mousePosition.y;
+				deal_with_xy1(x, y);
+
+				char name1[10] = {}, name2[10] = {}, name3[10] = {}, name4[10] = {};
+				sprintf(name1, "%d%d", int(x), int(y));
+				auto layout_tower = this->getChildByName(name1);
+
+				sprintf(name2, "%d%d_b", int(x), int(y));
+				layout_delete = this->getChildByName(name2);
+
+				sprintf(name3, "%d%d_up", int(x), int(y));
+				layout_uplevel = this->getChildByName(name3);
+
+				sprintf(name4, "%d%d_r", int(x), int(y));
+				layout_return = this->getChildByName(name4);
+
 				switch (type)
 				{
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
 				case ui::Widget::TouchEventType::ENDED: {
-					this->removeChildByName("towerSprite");
+					// 点击删除按钮，则将防御塔及其相关组件全部移除
+					layout_tower->removeFromParentAndCleanup(true);
+					layout_delete->removeFromParentAndCleanup(true);
+					layout_uplevel->removeFromParentAndCleanup(true);
+					layout_return->removeFromParentAndCleanup(true);
+					// 需要注意的是之前防御塔已经加入vector中，因此这里也要删除
+					auto it = TowerExist.begin();
+					int i = 0;
+					while (it != TowerExist.end())
+					{
+						if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY()) {
+							TowerExist.erase(it);
+							break;
+						}
+						else {
+							i++;
+							it++;
+						}
+					}
 				}
 					break;
 				default:
 					break;
 				}
 			});
-			
 
+			// 点击升级按钮
+			levelupbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+				x = mousePosition.x;
+				y = mousePosition.y;
+				deal_with_xy1(x, y);
+
+				char name2[10] = {},name3[10] = {}, name4[10] = {};
+
+				sprintf(name2, "%d%d_b", int(x), int(y));
+				layout_delete = this->getChildByName(name2);
+
+				sprintf(name3, "%d%d_up", int(x), int(y));
+				layout_uplevel = this->getChildByName(name3);
+
+				sprintf(name4, "%d%d_r", int(x), int(y));
+				layout_return = this->getChildByName(name4);
+
+				switch (type)
+				{
+				case ui::Widget::TouchEventType::BEGAN:
+					break;
+				case ui::Widget::TouchEventType::ENDED: {
+					// 点击升级按钮，按坐标通过迭代器寻找所要升级的防御塔
+					auto it = TowerExist.begin();
+					int i = 0;
+					while (it != TowerExist.end())
+					{
+						if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY()) {
+							if (TowerExist[i].getLevel() < 4)
+								TowerExist[i].upgrade(current_gold_coins);
+							else
+							{
+								showInsufficientLevelLabel();
+								layout_uplevel->setVisible(false);
+							}
+							break;
+						}
+						else {
+							i++;
+							it++;
+						}
+					}
+					layout_delete->setVisible(false);
+					layout_uplevel->setVisible(false);
+					layout_return->setVisible(false);
+				}
+					break;
+				default:
+					break;
+				}
+			});
+			// 建立之后将可建立位置设为不可见
 			for (unsigned int i = 1; i <= sizeof(pairxy) / sizeof(pairxy[0]); i++) {
 				board[i]->setVisible(false);
 			}
 		}
-		else if(place_success)
+
+		else if (place_success)
 		{
 			showInsufficientPlaceLabel();
 		}
@@ -497,7 +683,7 @@ void Game_one::onMouseDown(EventMouse* event)
 void Game_one::onMouseDown1(EventMouse* event)
 {
 	mousePosition = this->convertToNodeSpace(event->getLocationInView());
-	if(already==0)
+	if (already == 0)
 	{
 		tower0Clicked = checkTower0Clicked(mousePosition);
 		if (tower0Clicked != -1)
@@ -519,7 +705,7 @@ void Game_one::onMouseDown1(EventMouse* event)
 			// 如果没有点击到防御塔，在屏幕上显示鼠标位置
 			drawMousePositionLabel(mousePosition);
 			already = 0;
-			for (unsigned int i = 1; i <= sizeof(pairxy)/sizeof(pairxy[0]); i++) {
+			for (unsigned int i = 1; i <= sizeof(pairxy) / sizeof(pairxy[0]); i++) {
 				board[i]->setVisible(false);
 			}
 		}
@@ -584,6 +770,17 @@ void Game_one::showInsufficientPlaceLabel()
 	this->scheduleOnce([this](float dt) {
 		insufficientPlaceLabel->setVisible(false);
 	}, 1.0f, "hideInsufficientPlaceLabel");
+}
+
+// 显示已达到最高级，1秒后消失
+void Game_one::showInsufficientLevelLabel()
+{
+	insufficientLevelLabel->setVisible(true);
+
+	// 使用定时器延迟1秒后隐藏标签
+	this->scheduleOnce([this](float dt) {
+		insufficientLevelLabel->setVisible(false);
+	}, 1.0f, "hideInsufficientLevelLabel");
 }
 
 // 波数定时器
