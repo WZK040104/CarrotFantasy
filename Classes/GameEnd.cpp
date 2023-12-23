@@ -41,21 +41,21 @@ bool GameEnd::init()
 	auto continueItem = MenuItemImage::create("ContinueGame.png",
 		"ContinueGame.png", CC_CALLBACK_1(GameEnd::ContinueGame, this));
 
-	continueItem->setPosition(Vec2(origin.x - 58, origin.y -15));
+	continueItem->setPosition(Vec2(origin.x - 58, origin.y - 15));
 
 	// 返回菜单按钮
 	auto returnmenuItem = MenuItemImage::create("MapMenu.png",
 		"MapMenu.png", CC_CALLBACK_1(GameEnd::ReturnMenuGame, this));
 
-	returnmenuItem->setPosition(Vec2(origin.x + 10, origin.y -15));
+	returnmenuItem->setPosition(Vec2(origin.x + 10, origin.y - 15));
 
 	// 通关图框
 	auto successMenu = Sprite::create("Menu.png");
-	successMenu->setPosition(Vec2(visibleSize.width / 2 + 30, visibleSize.height / 2-15));
+	successMenu->setPosition(Vec2(visibleSize.width / 2 + 30, visibleSize.height / 2 - 15));
 	this->addChild(successMenu, 1);
 
 	auto successPic = Sprite::create("GameSuccess.png");
-	successPic->setPosition(Vec2(visibleSize.width / 2 + 30, visibleSize.height / 2+70));
+	successPic->setPosition(Vec2(visibleSize.width / 2 + 30, visibleSize.height / 2 + 70));
 	this->addChild(successPic, 1);
 
 	// 创建菜单

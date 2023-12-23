@@ -6,14 +6,16 @@
 #include "GameEnd.h"
 #include "GBKtoUTF-8.h"
 #include "Tower_kind.h"
+#include "CEnemy.h"
+#include "GenerateEnemy.h"
 #include <algorithm>
+#include "Carrot.h"
 
 USING_NS_CC;
-
 using namespace std;
 using namespace cocos2d::ui;
 
-int current_gold_coins = 100000;
+int current_gold_coins = 1000;
 int countnum = 20;
 
 Scene* Game_one::createScene()
@@ -51,61 +53,41 @@ std::string GBKToUTF8(const std::string& strGBK)
 extern bool map_two_unlock;
 extern bool map_one_continue;
 
-// 添加侧边防御塔的图标
-void Game_one::createTower0(const std::string& tower0Image, const std::string& tower0BackImage,
-	const std::string& towerImage, const std::string& towerBackImage,
+//添加侧边防御塔的图标
+void Game_one::createTower0(const std::string& towerImage, const std::string& towerBackImage,
 	int upgradeCoins, float positionY, int index)
 {
-	// 显示侧边的防御塔0
-	auto tower0 = Sprite::create(tower0Image);
-	if (tower0)
+	auto tower = Sprite::create(towerImage);
+	if (tower)
 	{
-		auto tower_back0 = Sprite::create(tower0BackImage);
-		tower_back0->setPosition(Vec2(42, positionY));
-		this->addChild(tower_back0, 1);  // 防御塔背景
-		tower0->setPosition(Vec2(42, positionY));  // 侧边防御塔位置
-		this->addChild(tower0, 1);
-
-		// 判断金币是否足够购买防御塔
-		if (current_gold_coins >= upgradeCoins)
-		{
-			auto tower = Sprite::create(towerImage);
-			if (tower)
-			{
-				auto tower_back = Sprite::create(towerBackImage);
-				tower_back->setPosition(Vec2(42, positionY));
-				this->addChild(tower_back, 1);  // 防御塔背景
-				tower->setPosition(Vec2(42, positionY));  // 侧边防御塔位置
-				this->addChild(tower, 1);
-			}
-			else
-			{
-				//problemLoading("'" + towerImage + "'");
-			}
-		}
-		else
-		{
-			//problemLoading("'" + towerImage + "' (Not enough gold coins)");
-		}
-
-		Label* build = Label::createWithTTF(to_string(upgradeCoins), "fonts/Marker Felt.ttf", 13);  // 添加文字，需要消耗的金币数量
-		if (build == nullptr)
-			problemLoading("'fonts/Marker Felt.ttf'");
-		else
-		{
-			build->setPosition(Vec2(63, positionY - 12));  // 添加的防御塔建造所需要的钱的位置
-			this->addChild(build, 1);
-		}
-		build->setColor(Color3B(0, 0, 0));  // 黑色
+		auto tower_back = Sprite::create(towerBackImage);
+		tower_back->setPosition(Vec2(42, positionY));
+		this->addChild(tower_back, 1);  // 防御塔背景
+		tower->setPosition(Vec2(42, positionY));  // 侧边防御塔位置
+		this->addChild(tower, 1);
 	}
 	else
 	{
-		//problemLoading("'" + tower0Image + "'");
+		//problemLoading("'" + towerImage + "'");
 	}
+
+	Label* build = Label::createWithTTF(to_string(upgradeCoins), "fonts/Marker Felt.ttf", 13);  // 添加文字，需要消耗的金币数量
+	if (build == nullptr)
+		problemLoading("'fonts/Marker Felt.ttf'");
+	else
+	{
+		build->setPosition(Vec2(63, positionY - 12));  // 添加的防御塔建造所需要的钱的位置
+		this->addChild(build, 1);
+	}
+	build->setColor(Color3B(0, 0, 0));  // 黑色
 }
 
 bool Game_one::init()
 {
+	//所有的初始化在这里：清空现有防御塔，重置金币，重置一切
+	TowerExist.clear();
+	current_gold_coins = 1000;
+
 	if (!Scene::init())
 	{
 		return false;
@@ -126,7 +108,7 @@ bool Game_one::init()
 	{
 		map_one->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
-		this->addChild(map_one, 0);
+		this->addChild(map_one, 1);
 	}
 
 	// 加入上边栏图片
@@ -154,7 +136,7 @@ bool Game_one::init()
 	}
 	else
 	{
-		pauseItem->setPosition(Vec2(origin.x + 160, origin.y + 143));
+		pauseItem->setPosition(Vec2(origin.x + 175, origin.y + 148));
 	}
 
 	// 返回按钮
@@ -174,31 +156,150 @@ bool Game_one::init()
 		returnItem->setPosition(Vec2(x, y));
 	}
 
-	// 加入金币图片
-	auto moneypic = Sprite::create("Money.png");
-	if (moneypic == nullptr)
-	{
-		problemLoading("'Money.png'");
-	}
-	else
-	{
-		moneypic->setPosition(Vec2(origin.x + 18, origin.y + visibleSize.height - 16));
-		this->addChild(moneypic, 1);
-	}
+	// 创建菜单
+	Vector<MenuItem*> MenuItems;
+	MenuItems.pushBack(pauseItem);
+	MenuItems.pushBack(returnItem);
+	auto menu = Menu::createWithArray(MenuItems);
+	this->addChild(menu, 1);
 
-	// 添加文字 金币数量
-	auto mapnum = Label::createWithTTF(to_string(current_gold_coins), "fonts/Marker Felt.ttf", 18);
-	if (mapnum == nullptr)
+	// 添加 "carrot" 图片
+	//Carrot carrot;
+	auto carrot_pic = Button::create("carrot.png", "carrot.png");
+	carrot_pic->setPosition(Vec2(86, 248));
+	this->addChild(carrot_pic, 1);
+	// 升级按钮
+	auto levelupcarrotbutton = Button::create("levelup.png");
+	levelupcarrotbutton->setPosition(Vec2(96, 224));
+	this->addChild(levelupcarrotbutton, 2, "carrot_u");
+	levelupcarrotbutton->setVisible(false);
+	// 退出按钮
+	auto returncarrotbutton = Button::create("exit.png");
+	returncarrotbutton->setPosition(Vec2(80, 225));
+	this->addChild(returncarrotbutton, 2, "carrot_r");
+	returncarrotbutton->setVisible(false);
+	// 升级金币标签
+	auto levelupcarrotcoin = Label::createWithTTF("20", "fonts/Marker Felt.ttf", 10);
+	levelupcarrotcoin->setColor(Color3B(255, 255, 0));
+	levelupcarrotcoin->setVisible(false);
+	levelupcarrotcoin->setPosition(Vec2(106, 224));
+	this->addChild(levelupcarrotcoin, 2, "carrot_c");
+	// 等级标签
+	auto carrotlevel = Label::createWithTTF("Lv.1", "fonts/Marker Felt.ttf", 10);
+	carrotlevel->setColor(Color3B(255, 0, 0));
+	carrotlevel->setVisible(false);
+	carrotlevel->setPosition(Vec2(86, 268));
+	this->addChild(carrotlevel, 2, "carrot_l");
+
+	carrot_pic->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+		switch (type)
+		{
+		case ui::Widget::TouchEventType::BEGAN:
+			break;
+		case ui::Widget::TouchEventType::ENDED: {
+			layout_uplevel = this->getChildByName("carrot_u");
+			layout_return = this->getChildByName("carrot_r");
+			layout_coin = (Label*)(getChildByName("carrot_c"));
+			layout_nowlevel = (Label*)(getChildByName("carrot_l"));
+
+			/*int money = carrot.getUpgradeCost();
+			layout_coin->setString(std::to_string(money));
+			char* levelname = new char[10];
+			sprintf(levelname, "Lv.%d", carrot.getLevel());
+			layout_nowlevel->setString(levelname);
+			delete levelname;*/
+
+			layout_uplevel->setVisible(true);
+			layout_return->setVisible(true);
+			layout_coin->setVisible(true);
+			layout_nowlevel->setVisible(true);
+		}
+			break;
+		default:
+			break;
+		}
+	});
+
+	returncarrotbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+		switch (type)
+		{
+		case ui::Widget::TouchEventType::BEGAN:
+			break;
+		case ui::Widget::TouchEventType::ENDED: {
+			layout_uplevel = this->getChildByName("carrot_u");
+			layout_return = this->getChildByName("carrot_r");
+			layout_coin = (Label*)(getChildByName("carrot_c"));
+			layout_nowlevel = (Label*)(getChildByName("carrot_l"));
+			layout_uplevel->setVisible(false);
+			layout_return->setVisible(false);
+			layout_coin->setVisible(false);
+			layout_nowlevel->setVisible(false);
+		}
+			break;
+		default:
+			break;
+		}
+	});
+
+	levelupcarrotbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+		switch (type)
+		{
+		case ui::Widget::TouchEventType::BEGAN:
+			break;
+		case ui::Widget::TouchEventType::ENDED: {
+			layout_uplevel = this->getChildByName("carrot_u");
+			layout_return = this->getChildByName("carrot_r");
+			layout_coin = (Label*)(getChildByName("carrot_c"));
+			layout_nowlevel = (Label*)(getChildByName("carrot_l"));
+			/*if (carrot.getLevel() < 4)
+			{
+				if (carrot.upgrade(current_gold_coins)) {
+					updateGoldCoinsDisplay();
+					showTowerGrey();
+				}
+				else
+					showInsufficientGoldLabel();
+			}
+			else
+			{
+				showInsufficientLevelLabel();
+				layout_uplevel->setVisible(false);
+			}*/
+			layout_uplevel->setVisible(false);
+			layout_return->setVisible(false);
+			layout_coin->setVisible(false);
+			layout_nowlevel->setVisible(false);
+		}
+			break;
+		default:
+			break;
+		}
+	});
+
+	auto CarrotHealthBack = Sprite::create("CarrotHealthBack.png");
+	CarrotHealthBack->setPosition(Vec2(86, 278));// 萝卜上方位置
+	this->addChild(CarrotHealthBack, 1);
+
+	// 添加萝卜血条
+	ProgressTimer* healthBar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+	healthBar->setType(ProgressTimer::Type::BAR);
+	healthBar->setMidpoint(Vec2(0, 0.5));
+	healthBar->setBarChangeRate(Vec2(1, 0));
+	healthBar->setPosition(Vec2(86, 278));  // 萝卜上方位置
+	healthBar->setPercentage(100.0f);  // 初始血量百分比
+	this->addChild(healthBar, 2, "healthBar");
+
+	//添加出怪牌图片
+	auto GuideBoard = Sprite::create("GuideBoard.png");
+	if (GuideBoard)
 	{
-		problemLoading("'fonts/Marker Felt.ttf'");
+		GuideBoard->setPosition(Vec2(433, 75)); //出怪牌位置
+		this->addChild(GuideBoard, 1);
 	}
 	else
 	{
-		mapnum->setAnchorPoint(Vec2(0, 0.5));
-		mapnum->setPosition(Vec2(origin.x + 35, origin.y + visibleSize.height - 18));
-		this->addChild(mapnum, 1);
+		problemLoading("'GuideBoard.png'");
 	}
-	mapnum->setColor(Color3B(255, 255, 0));
 
 	// 添加文字
 	auto countdown = Label::createWithTTF("Monsters strike 20 seconds later", "fonts/Marker Felt.ttf", 14);
@@ -215,19 +316,78 @@ bool Game_one::init()
 		schedule(CC_CALLBACK_1(Game_one::step, this), 1.0f, "step_key");
 	}
 
-	// 显示侧边的防御塔0
-	createTower0("tower_zero0.png", "tower_back0.png", "tower_zero.png", "tower_back.png", tower0_upgrade_coins[0], 230, 0);
+	//显示侧边的防御塔0
+	createTower0("tower_zero.png", "tower_back.png", tower0_upgrade_coins[0], 230, 0);
 
-	// 显示侧边的防御塔1
-	createTower0("tower_one0.png", "tower_back0.png", "tower_one.png", "tower_back.png", tower1_upgrade_coins[0], 185, 1);
+	//显示侧边的防御塔1
+	createTower0("tower_one.png", "tower_back.png", tower1_upgrade_coins[0], 185, 1);
 
-	// 显示侧边的防御塔2
-	createTower0("tower_two0.png", "tower_back0.png", "tower_two.png", "tower_back.png", tower2_upgrade_coins[0], 140, 2);
+	//显示侧边的防御塔2
+	createTower0("tower_two.png", "tower_back.png", tower2_upgrade_coins[0], 140, 2);
 
-	// 显示侧边的防御塔3
-	createTower0("tower_three0.png", "tower_back0.png", "tower_three.png", "tower_back.png", tower3_upgrade_coins[0], 95, 3);
+	//显示侧边的防御塔3
+	createTower0("tower_three.png", "tower_back.png", tower3_upgrade_coins[0], 95, 3);
 
-	// 初始化金币不足的标签
+	// 显示侧边的灰色防御塔
+	{
+		tower_zero0 = Sprite::create("tower_zero0.png");
+		tower_back0 = Sprite::create("tower_back0.png");
+		tower_back0->setPosition(Vec2(42, 230));
+		tower_zero0->setPosition(Vec2(42, 230));  // 侧边防御塔位置
+		tower_back0->setVisible(false);
+		tower_zero0->setVisible(false);
+		this->addChild(tower_back0, 1);
+		this->addChild(tower_zero0, 1);
+		buildcoins0 = Label::createWithTTF(to_string(getTowerUpgradeCoins(0)), "fonts/Marker Felt.ttf", 13);  // 添加文字，需要消耗的金币数量
+		buildcoins0->setPosition(Vec2(63, 230 - 12));
+		buildcoins0->setVisible(false);
+		buildcoins0->setColor(Color3B(0, 0, 0));
+		this->addChild(buildcoins0, 1);
+
+		tower_one0 = Sprite::create("tower_one0.png");
+		tower_back1 = Sprite::create("tower_back0.png");
+		tower_back1->setPosition(Vec2(42, 185));
+		tower_one0->setPosition(Vec2(42, 185));  // 侧边防御塔位置
+		tower_back1->setVisible(false);
+		tower_one0->setVisible(false);
+		this->addChild(tower_back1, 1);
+		this->addChild(tower_one0, 1);
+		buildcoins1 = Label::createWithTTF(to_string(getTowerUpgradeCoins(1)), "fonts/Marker Felt.ttf", 13);  // 添加文字，需要消耗的金币数量
+		buildcoins1->setPosition(Vec2(63, 185 - 12));
+		buildcoins1->setVisible(false);
+		buildcoins1->setColor(Color3B(0, 0, 0));
+		this->addChild(buildcoins1, 1);
+
+		tower_two0 = Sprite::create("tower_two0.png");
+		tower_back2 = Sprite::create("tower_back0.png");
+		tower_back2->setPosition(Vec2(42, 140));
+		tower_two0->setPosition(Vec2(42, 140));  // 侧边防御塔位置
+		tower_back2->setVisible(false);
+		tower_two0->setVisible(false);
+		this->addChild(tower_back2, 1);
+		this->addChild(tower_two0, 1);
+		buildcoins2 = Label::createWithTTF(to_string(getTowerUpgradeCoins(2)), "fonts/Marker Felt.ttf", 13);  // 添加文字，需要消耗的金币数量
+		buildcoins2->setPosition(Vec2(63, 140 - 12));
+		buildcoins2->setVisible(false);
+		buildcoins2->setColor(Color3B(0, 0, 0));
+		this->addChild(buildcoins2, 1);
+
+		tower_three0 = Sprite::create("tower_three0.png");
+		tower_back3 = Sprite::create("tower_back0.png");
+		tower_back3->setPosition(Vec2(42, 95));
+		tower_three0->setPosition(Vec2(42, 95));  // 侧边防御塔位置
+		tower_back3->setVisible(false);
+		tower_three0->setVisible(false);
+		this->addChild(tower_back3, 1);
+		this->addChild(tower_three0, 1);
+		buildcoins3 = Label::createWithTTF(to_string(getTowerUpgradeCoins(3)), "fonts/Marker Felt.ttf", 13);  // 添加文字，需要消耗的金币数量
+		buildcoins3->setPosition(Vec2(63, 95 - 12));
+		buildcoins3->setVisible(false);
+		buildcoins3->setColor(Color3B(0, 0, 0));
+		this->addChild(buildcoins3, 1);
+	}
+
+	//初始化金币不足的标签
 	insufficientGoldLabel = Label::createWithTTF("not enough gold coins!", "fonts/Marker Felt.ttf", 14);
 	insufficientGoldLabel->setColor(Color3B(255, 0, 0));  // 红色
 	insufficientGoldLabel->setVisible(false);  // 初始时设置为不可见
@@ -263,50 +423,30 @@ bool Game_one::init()
 		}
 	}
 
-	// 创建菜单
-	Vector<MenuItem*> MenuItems;
-	MenuItems.pushBack(pauseItem);
-	MenuItems.pushBack(returnItem);
-	auto menu = Menu::createWithArray(MenuItems);
-	this->addChild(menu, 1);
 
-	// 添加 "carrot" 图片
-	auto carrot = Sprite::create("carrot.png");
-	if (carrot)
+	// 加入金币图片
+	auto moneypic = Sprite::create("Money.png");
+	if (moneypic == nullptr)
 	{
-		carrot->setPosition(Vec2(86, 248)); //萝卜位置
-		this->addChild(carrot, 1);
-
-		auto CarrotHealthBack = Sprite::create("CarrotHealthBack.png");
-		CarrotHealthBack->setPosition(Vec2(86, 278));// 萝卜上方位置
-		this->addChild(CarrotHealthBack, 1);
-
-		// 添加萝卜血条
-		ProgressTimer* healthBar = ProgressTimer::create(Sprite::create("HealthBar.png"));
-		healthBar->setType(ProgressTimer::Type::BAR);
-		healthBar->setMidpoint(Vec2(0, 0.5));
-		healthBar->setBarChangeRate(Vec2(1, 0));
-		healthBar->setPosition(Vec2(86, 278));  // 萝卜上方位置
-		healthBar->setPercentage(100.0f);  // 初始血量百分比
-		this->addChild(healthBar, 2, "healthBar");
+		problemLoading("'Money.png'");
 	}
 	else
 	{
-		problemLoading("'carrot.png'");
+		moneypic->setPosition(Vec2(origin.x + 18, origin.y + visibleSize.height - 16));
+		this->addChild(moneypic, 1);
 	}
-
-	// 添加出怪牌图片
-	auto GuideBoard = Sprite::create("GuideBoard.png");
-	if (GuideBoard)
-	{
-		GuideBoard->setPosition(Vec2(433, 75)); //出怪牌位置
-		this->addChild(GuideBoard, 1);
+	//添加文字金币数量
+	mapnum = Label::createWithTTF(to_string(current_gold_coins), "fonts/Marker Felt.ttf", 18);
+	if (mapnum == nullptr) {
+		problemLoading("'fonts/Marker Felt.ttf'");
 	}
-	else
-	{
-		problemLoading("'GuideBoard.png'");
+	else {
+		mapnum->setPosition(Vec2(origin.x + 48, origin.y + visibleSize.height - 17));
+		this->addChild(mapnum, 2);
+		mapnum->setColor(Color3B(255, 255, 0));
 	}
-
+	updateGoldCoinsDisplay();
+	showTowerGrey();
 	// 添加鼠标位置显示
 	auto mouseListener = EventListenerMouse::create();
 	mouseListener->onMouseDown = CC_CALLBACK_1(Game_one::onMouseDown, this);
@@ -315,7 +455,136 @@ bool Game_one::init()
 	mouseListener1->onMouseDown = CC_CALLBACK_1(Game_one::onMouseDown1, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener1, this);
 
+	EnemyExist.clear();
+	Enemy1* e1 = new Enemy1();
+	e1->initial(1, 30, 0.5, 10, 0, 0);
+	Enemy2* e2 = new Enemy2();
+	e2->initial(2, 30, 0.5, 10, 0, 0);
+
+	EnemyExist.push_back(e1);
+	EnemyExist.push_back(e2);
+
+	for (auto it = EnemyExist.begin(); it != EnemyExist.end();)
+	{
+		switch ((*it)->enemytype)
+		{
+		case 0:
+			//(*it)->enemySprite = Sprite::create("Enemy_zero.png");
+			break;
+		case 1:
+			(*it)->enemySprite = Sprite::create("Enemy_one.png");
+			break;
+		case 2:
+			(*it)->enemySprite = Sprite::create("Enemy_two.png");
+			break;
+		case 3:
+			(*it)->enemySprite = Sprite::create("Enemy_three.png");
+			break;
+		case 4:
+			(*it)->enemySprite = Sprite::create("Enemy_four.png");
+			break;
+		default:
+			break;
+		}
+		(*it)->set_x(400);
+		(*it)->set_y(75);
+		(*it)->enemySprite->setPosition(Vec2(400, 75));
+		this->addChild((*it)->enemySprite, 1);
+		++it;
+	}
+	// 每帧调用 update 函数
+	this->schedule(CC_SCHEDULE_SELECTOR(Game_one::Enemyupdate), 1.0f / 60.0f);
+
 	return true;
+}
+
+void Game_one::Enemyupdate(float dt)//访问全体存在的怪物并且更改其坐标
+{
+	for (auto it = EnemyExist.begin(); it != EnemyExist.end();)
+	{
+		if ((*it)->alive())
+		{
+			static float speed = 0.5;
+			static float new_x = 400, new_y = 75;
+
+			if (new_x >= 260 && new_y == 75)
+				new_x -= speed;
+			else if (new_x >= 259 && new_y >= 75 && new_y <= 245)
+				new_y += speed;
+			else if (new_y <= 246 && new_x < 261 && new_x > 102)
+				new_x -= speed;
+			else if (new_x <= 102)
+				(*it)->HP_calculate(10000);
+
+			(*it)->enemySprite->setPosition(Vec2(new_x, new_y));
+			(*it)->set_x(new_x);
+			(*it)->set_y(new_y);
+
+		}
+		++it;
+	}
+}
+
+//更新金币的数量
+void Game_one::updateGoldCoinsDisplay()
+{
+	// 更新文字金币数量
+	if (mapnum != nullptr) {
+		mapnum->setString(to_string(current_gold_coins));
+	}
+}
+
+//更新灰色防御塔是否可见
+void Game_one::showTowerGrey()
+{
+	if (current_gold_coins < getTowerUpgradeCoins(0))
+	{
+		tower_back0->setVisible(true);
+		tower_zero0->setVisible(true);
+		buildcoins0->setVisible(true);
+	}
+	else
+	{
+		tower_back0->setVisible(false);
+		tower_zero0->setVisible(false);
+		buildcoins0->setVisible(false);
+	}
+	if (current_gold_coins < getTowerUpgradeCoins(1))
+	{
+		tower_back1->setVisible(true);
+		tower_one0->setVisible(true);
+		buildcoins1->setVisible(true);
+	}
+	else
+	{
+		tower_back1->setVisible(false);
+		tower_one0->setVisible(false);
+		buildcoins1->setVisible(false);
+	}
+	if (current_gold_coins < getTowerUpgradeCoins(2))
+	{
+		tower_back2->setVisible(true);
+		tower_two0->setVisible(true);
+		buildcoins2->setVisible(true);
+	}
+	else
+	{
+		tower_back2->setVisible(false);
+		tower_two0->setVisible(false);
+		buildcoins2->setVisible(false);
+	}
+	if (current_gold_coins < getTowerUpgradeCoins(3))
+	{
+		tower_back3->setVisible(true);
+		tower_three0->setVisible(true);
+		buildcoins3->setVisible(true);
+	}
+	else
+	{
+		tower_back3->setVisible(false);
+		tower_three0->setVisible(false);
+		buildcoins0->setVisible(false);
+	}
 }
 
 // 暂停游戏
@@ -354,8 +623,7 @@ void Game_one::Success(Ref* pSender)
 
 Vec2 towerPosition;  // 用于存储防御塔的位置
 int tower0Clicked = -1;
-
-// 建造所需要的金币
+//建造所需要的金币
 int Game_one::getTowerUpgradeCoins(int towerType)
 {
 	switch (towerType)
@@ -373,10 +641,7 @@ int Game_one::getTowerUpgradeCoins(int towerType)
 	}
 }
 
-double x, y;
-
-// 处理xy的值
-bool deal_with_xy1(double &x, double& y)
+bool deal_with_xy1(double &x, double& y)//处理xy的值
 {
 	if (x > 102 && x <= 137)
 		x = 120;
@@ -412,10 +677,16 @@ bool deal_with_xy1(double &x, double& y)
 	else if (y > 228 && y <= 262)
 		y = 245;
 
-	if (x <= 71 && y > 70 && y <= 250)
+	if (x > 417 || x <= 102 || y > 262 || y <= 24)
+		return 0;
+	if (y == 245 && x > 102 && x < 277)
+		return 0;
+	if (y == 75 && x > 242 && x < 417)
+		return 0;
+	if (x == 260 && y > 58 && y < 262)
 		return 0;
 
-	for (unsigned int i = 0; i < TowerExist.size(); i++)
+	for (int i = 0; i < TowerExist.size(); i++)
 	{
 		if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY())
 			return 0;
@@ -426,14 +697,9 @@ bool deal_with_xy1(double &x, double& y)
 
 int already = 0;//是否选中防御塔
 Vec2 mousePosition;
-
-// 已经选中防御塔准备放置
-void Game_one::onMouseDown(EventMouse* event)
+void Game_one::onMouseDown(EventMouse* event)//已经选中防御塔准备放置
 {
 	mousePosition = this->convertToNodeSpace(event->getLocationInView());
-	cocos2d::Node* layout_delete;
-	cocos2d::Node* layout_uplevel;
-	cocos2d::Node* layout_return;
 
 	if (already == 1)
 	{
@@ -441,11 +707,11 @@ void Game_one::onMouseDown(EventMouse* event)
 		{
 			board[i]->setVisible(true);
 		}
+
 		towerPosition = mousePosition;
-		x = towerPosition.x;
-		y = towerPosition.y;
-		bool place_success = deal_with_xy1(x, y); // 处理xy坐标，是否合法放置
-		bool it = false; // 处理xy坐标，是否成功放置在点位上
+		double x = towerPosition.x, y = towerPosition.y;
+		bool place_success = deal_with_xy1(x, y);//处理xy坐标，是否成功放置
+		bool it = false;
 		for (unsigned int i = 1; i <= sizeof(pairxy) / sizeof(pairxy[0]); i++) {
 			if (pairxy[i - 1] == Vec2(x, y))
 			{
@@ -453,11 +719,14 @@ void Game_one::onMouseDown(EventMouse* event)
 				break;
 			}
 		}
-		if (it&&place_success)
+
+		if (it && place_success)
 		{
 			towerPosition = Vec2(x, y);
 			placeTower(TowerExist, tower0Clicked, x, y);
 			current_gold_coins -= getTowerUpgradeCoins(tower0Clicked);
+			updateGoldCoinsDisplay();
+			showTowerGrey();
 			// 根据点击的防御塔类型创建相应的 Button
 			Button* towerSprite;
 			switch (tower0Clicked)
@@ -480,53 +749,111 @@ void Game_one::onMouseDown(EventMouse* event)
 			towerSprite->setPosition(towerPosition);
 			// 每个防御塔及其相关组件都被命名为他们的坐标
 			// 因此可以通过鼠标点击的坐标来找到相应的防御塔
-			char name1[10] = {}, name2[10] = {}, name3[10] = {}, name4[10] = {};
+			char*name1 = new char[15], *name2 = new char[15], *name3 = new char[15],
+				*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+
 			sprintf(name1, "%d%d", int(x), int(y));
 			this->addChild(towerSprite, 1, name1);
-			// 退出按钮
-			Button* returnbutton = Button::create("exit.png");
-			sprintf(name4, "%d%d_r", int(x), int(y));
-			returnbutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y-10));
-			this->addChild(returnbutton, 2, name4);
-			returnbutton->setVisible(false);
 			// 删除按钮
-			Button* deletebutton = Button::create("delete.png");
-			sprintf(name2, "%d%d_b", int(x), int(y));
+			auto deletebutton = Button::create("delete.png");
+			sprintf(name2, "%d%d_d", int(x), int(y));
 			deletebutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y));
 			this->addChild(deletebutton, 2, name2);
 			deletebutton->setVisible(false);
 			// 升级按钮
-			Button* levelupbutton = Button::create("levelup.png");
-			sprintf(name3, "%d%d_up", int(x), int(y));
+			auto levelupbutton = Button::create("levelup.png");
+			sprintf(name3, "%d%d_u", int(x), int(y));
 			levelupbutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y + 10));
 			this->addChild(levelupbutton, 2, name3);
 			levelupbutton->setVisible(false);
-			
+			// 退出按钮
+			auto returnbutton = Button::create("exit.png");
+			sprintf(name4, "%d%d_r", int(x), int(y));
+			returnbutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y - 10));
+			this->addChild(returnbutton, 2, name4);
+			returnbutton->setVisible(false);
+			// 升级金币标签
+			auto levelupcoin = Label::createWithTTF("20", "fonts/Marker Felt.ttf", 10);
+			levelupcoin->setColor(Color3B(255, 255, 0));
+			levelupcoin->setVisible(false);
+			levelupcoin->setPosition(Vec2(towerPosition.x + 20, towerPosition.y + 10));
+			sprintf(name5, "%d%d_c", int(x), int(y));
+			this->addChild(levelupcoin, 2, name5);
+			// 防御塔等级标签
+			auto towerlevel = Label::createWithTTF("Lv.1", "fonts/Marker Felt.ttf", 10);
+			towerlevel->setColor(Color3B(255, 0, 0));
+			towerlevel->setVisible(false);
+			towerlevel->setPosition(Vec2(towerPosition.x - 10, towerPosition.y - 10));
+			sprintf(name6, "%d%d_l", int(x), int(y));
+			this->addChild(towerlevel, 2, name6);
+
+			delete[]name1;
+			delete[]name2;
+			delete[]name3;
+			delete[]name4;
+			delete[]name5;
+			delete[]name6;
+
 			// 点击防御塔
 			towerSprite->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
 				x = mousePosition.x;
 				y = mousePosition.y;
 				deal_with_xy1(x, y);
 
-				char name2[10] = {}, name3[10] = {}, name4[10] = {};
-				sprintf(name2, "%d%d_b", int(x), int(y));
-				auto layout_delete = this->getChildByName(name2);
-
-				sprintf(name3, "%d%d_up", int(x), int(y));
-				layout_uplevel = this->getChildByName(name3);
-
-				sprintf(name4, "%d%d_r", int(x), int(y));
-				layout_return = this->getChildByName(name4);
-
 				switch (type)
 				{
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
-				case ui::Widget::TouchEventType::ENDED:
+				case ui::Widget::TouchEventType::ENDED: {
+					char*name2 = new char[15], *name3 = new char[15],
+						*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+					sprintf(name2, "%d%d_d", int(x), int(y));
+					layout_delete = this->getChildByName(name2);
+
+					sprintf(name3, "%d%d_u", int(x), int(y));
+					layout_uplevel = this->getChildByName(name3);
+
+					sprintf(name4, "%d%d_r", int(x), int(y));
+					layout_return = this->getChildByName(name4);
+
+					sprintf(name5, "%d%d_c", int(x), int(y));
+					layout_coin = (Label*)(getChildByName(name5));
+
+					sprintf(name6, "%d%d_l", int(x), int(y));
+					layout_nowlevel = (Label*)(getChildByName(name6));
+
+					delete[]name2;
+					delete[]name3;
+					delete[]name4;
+					delete[]name5;
+					delete[]name6;
+
+					auto it = TowerExist.begin();
+					int i = 0;
+					while (it != TowerExist.end())
+					{
+						if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY()) {
+							int money = TowerExist[i].getUpgradeCost();
+							layout_coin->setString(std::to_string(money));
+							char* levelname = new char[10];
+							sprintf(levelname, "Lv.%d", TowerExist[i].getLevel());
+							layout_nowlevel->setString(levelname);
+							delete levelname;
+							break;
+						}
+						else {
+							i++;
+							it++;
+						}
+					}
+
 					// 点击防御塔，则将删除和升级按钮设为可见
 					layout_delete->setVisible(true);
 					layout_uplevel->setVisible(true);
 					layout_return->setVisible(true);
+					layout_coin->setVisible(true);
+					layout_nowlevel->setVisible(true);
+				}
 					break;
 				default:
 					break;
@@ -539,25 +866,41 @@ void Game_one::onMouseDown(EventMouse* event)
 				y = mousePosition.y;
 				deal_with_xy1(x, y);
 
-				char name2[10] = {}, name3[10] = {}, name4[10] = {};
-				sprintf(name2, "%d%d_b", int(x), int(y));
-				layout_delete = this->getChildByName(name2);
-
-				sprintf(name3, "%d%d_up", int(x), int(y));
-				layout_uplevel = this->getChildByName(name3);
-
-				sprintf(name4, "%d%d_r", int(x), int(y));
-				layout_return = this->getChildByName(name4);
-
 				switch (type)
 				{
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
-				case ui::Widget::TouchEventType::ENDED:
+				case ui::Widget::TouchEventType::ENDED: {
+					char*name2 = new char[15], *name3 = new char[15],
+						*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+					sprintf(name2, "%d%d_d", int(x), int(y));
+					layout_delete = this->getChildByName(name2);
+
+					sprintf(name3, "%d%d_u", int(x), int(y));
+					layout_uplevel = this->getChildByName(name3);
+
+					sprintf(name4, "%d%d_r", int(x), int(y));
+					layout_return = this->getChildByName(name4);
+
+					sprintf(name5, "%d%d_c", int(x), int(y));
+					layout_coin = (Label*)(getChildByName(name5));
+
+					sprintf(name6, "%d%d_l", int(x), int(y));
+					layout_nowlevel = (Label*)(getChildByName(name6));
+
+					delete[]name2;
+					delete[]name3;
+					delete[]name4;
+					delete[]name5;
+					delete[]name6;
+
 					// 点击退出按钮，则将删除和升级按钮设为不可见
 					layout_return->setVisible(false);
 					layout_delete->setVisible(false);
 					layout_uplevel->setVisible(false);
+					layout_coin->setVisible(false);
+					layout_nowlevel->setVisible(false);
+				}
 					break;
 				default:
 					break;
@@ -570,29 +913,45 @@ void Game_one::onMouseDown(EventMouse* event)
 				y = mousePosition.y;
 				deal_with_xy1(x, y);
 
-				char name1[10] = {}, name2[10] = {}, name3[10] = {}, name4[10] = {};
-				sprintf(name1, "%d%d", int(x), int(y));
-				auto layout_tower = this->getChildByName(name1);
-
-				sprintf(name2, "%d%d_b", int(x), int(y));
-				layout_delete = this->getChildByName(name2);
-
-				sprintf(name3, "%d%d_up", int(x), int(y));
-				layout_uplevel = this->getChildByName(name3);
-
-				sprintf(name4, "%d%d_r", int(x), int(y));
-				layout_return = this->getChildByName(name4);
-
 				switch (type)
 				{
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
 				case ui::Widget::TouchEventType::ENDED: {
+					char*name1 = new char[15], *name2 = new char[15], *name3 = new char[15],
+						*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+					sprintf(name1, "%d%d", int(x), int(y));
+					auto layout_tower = this->getChildByName(name1);
+
+					sprintf(name2, "%d%d_d", int(x), int(y));
+					layout_delete = this->getChildByName(name2);
+
+					sprintf(name3, "%d%d_u", int(x), int(y));
+					layout_uplevel = this->getChildByName(name3);
+
+					sprintf(name4, "%d%d_r", int(x), int(y));
+					layout_return = this->getChildByName(name4);
+
+					sprintf(name5, "%d%d_c", int(x), int(y));
+					layout_coin = (Label*)(getChildByName(name5));
+
+					sprintf(name6, "%d%d_l", int(x), int(y));
+					layout_nowlevel = (Label*)(getChildByName(name6));
+
+					delete[]name1;
+					delete[]name2;
+					delete[]name3;
+					delete[]name4;
+					delete[]name5;
+					delete[]name6;
+
 					// 点击删除按钮，则将防御塔及其相关组件全部移除
 					layout_tower->removeFromParentAndCleanup(true);
 					layout_delete->removeFromParentAndCleanup(true);
 					layout_uplevel->removeFromParentAndCleanup(true);
 					layout_return->removeFromParentAndCleanup(true);
+					layout_coin->removeFromParentAndCleanup(true);
+					layout_nowlevel->removeFromParentAndCleanup(true);
 					// 需要注意的是之前防御塔已经加入vector中，因此这里也要删除
 					auto it = TowerExist.begin();
 					int i = 0;
@@ -600,6 +959,9 @@ void Game_one::onMouseDown(EventMouse* event)
 					{
 						if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY()) {
 							TowerExist.erase(it);
+							current_gold_coins += 10;
+							updateGoldCoinsDisplay();
+							showTowerGrey();
 							break;
 						}
 						else {
@@ -620,22 +982,34 @@ void Game_one::onMouseDown(EventMouse* event)
 				y = mousePosition.y;
 				deal_with_xy1(x, y);
 
-				char name2[10] = {},name3[10] = {}, name4[10] = {};
-
-				sprintf(name2, "%d%d_b", int(x), int(y));
-				layout_delete = this->getChildByName(name2);
-
-				sprintf(name3, "%d%d_up", int(x), int(y));
-				layout_uplevel = this->getChildByName(name3);
-
-				sprintf(name4, "%d%d_r", int(x), int(y));
-				layout_return = this->getChildByName(name4);
-
 				switch (type)
 				{
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
 				case ui::Widget::TouchEventType::ENDED: {
+					char*name2 = new char[15], *name3 = new char[15],
+						*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+					sprintf(name2, "%d%d_d", int(x), int(y));
+					layout_delete = this->getChildByName(name2);
+
+					sprintf(name3, "%d%d_u", int(x), int(y));
+					layout_uplevel = this->getChildByName(name3);
+
+					sprintf(name4, "%d%d_r", int(x), int(y));
+					layout_return = this->getChildByName(name4);
+
+					sprintf(name5, "%d%d_c", int(x), int(y));
+					layout_coin = (Label*)(getChildByName(name5));
+
+					sprintf(name6, "%d%d_l", int(x), int(y));
+					layout_nowlevel = (Label*)(getChildByName(name6));
+
+					delete[]name2;
+					delete[]name3;
+					delete[]name4;
+					delete[]name5;
+					delete[]name6;
+
 					// 点击升级按钮，按坐标通过迭代器寻找所要升级的防御塔
 					auto it = TowerExist.begin();
 					int i = 0;
@@ -643,7 +1017,14 @@ void Game_one::onMouseDown(EventMouse* event)
 					{
 						if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY()) {
 							if (TowerExist[i].getLevel() < 4)
-								TowerExist[i].upgrade(current_gold_coins);
+							{
+								if (TowerExist[i].upgrade(current_gold_coins)) {
+									updateGoldCoinsDisplay();
+									showTowerGrey();
+								}
+								else
+									showInsufficientGoldLabel();
+							}
 							else
 							{
 								showInsufficientLevelLabel();
@@ -659,6 +1040,8 @@ void Game_one::onMouseDown(EventMouse* event)
 					layout_delete->setVisible(false);
 					layout_uplevel->setVisible(false);
 					layout_return->setVisible(false);
+					layout_coin->setVisible(false);
+					layout_nowlevel->setVisible(false);
 				}
 					break;
 				default:
@@ -678,9 +1061,8 @@ void Game_one::onMouseDown(EventMouse* event)
 		already = 0;
 	}
 }
-
 // 还未选中防御塔
-void Game_one::onMouseDown1(EventMouse* event)
+void Game_one::onMouseDown1(EventMouse* event)//还未选中防御塔
 {
 	mousePosition = this->convertToNodeSpace(event->getLocationInView());
 	if (already == 0)
@@ -709,10 +1091,13 @@ void Game_one::onMouseDown1(EventMouse* event)
 				board[i]->setVisible(false);
 			}
 		}
+		return;
+
 	}
 }
 
-// 在屏幕上显示鼠标位置
+
+// 在屏幕上显示鼠标位置（之后要删）
 void Game_one::drawMousePositionLabel(const Vec2& position)
 {
 	// 移除之前的标签
@@ -726,7 +1111,7 @@ void Game_one::drawMousePositionLabel(const Vec2& position)
 	addChild(label);
 }
 
-// 是否点击到侧边的防御塔了
+//是否点击到侧边的防御塔了
 int Game_one::checkTower0Clicked(const Vec2& touchLocation)
 {
 	// 定义侧边防御塔的位置和大小
@@ -750,7 +1135,7 @@ int Game_one::checkTower0Clicked(const Vec2& touchLocation)
 	return -1;
 }
 
-// 显示金币不足，1秒后消失
+//显示金币不足，1秒后消失
 void Game_one::showInsufficientGoldLabel()
 {
 	insufficientGoldLabel->setVisible(true);

@@ -56,14 +56,19 @@ double CTower::getTimeCooldown() const
 }
 
 //升级并消耗金币
-void CTower::upgrade(int & gold_coins)
+bool CTower::upgrade(int & gold_coins)
 {
-	tower_level++;
-	gold_coins -= getUpgradeCost();
+	if (gold_coins - getUpgradeCost() >= 0) {
+		gold_coins -= getUpgradeCost();
+		tower_level++;
+		return true;
+	}
+	else
+		return false;
 }
 
 //敌人是否在攻击范围内
-bool CTower::inRange(const CEnemy& enemy)
+bool CTower::inRange(CEnemy& enemy)
 {
 	if ((enemy.EnemyPositionX() - getPositionX()) * (enemy.EnemyPositionX() - getPositionX()) + 
 		(enemy.EnemyPositionY() - getPositionY()) * (enemy.EnemyPositionY() - getPositionY()) 
@@ -94,7 +99,7 @@ CEnemy* nearestEnemy(vector<CEnemy*>& enemy, int positionx,int positiony)
 	}
 
 	CEnemy* nearest = enemy[0];
-	for (unsigned int i = 1; i < enemy.size(); i++)
+	for (int i = 1; i < enemy.size(); i++)
 	{
 		if ((enemy[i]->EnemyPositionX() - positionx) * (enemy[i]->EnemyPositionX() - positionx) 
 			+ (enemy[i]->EnemyPositionY() - positiony) * (enemy[i]->EnemyPositionY() - positiony) 
@@ -131,5 +136,6 @@ void CTower::attack(vector<CEnemy>& enemy, int damage_per_time)
 			target->HP_calculate(getDamage());	// 实施攻击
 			resetCooldown();					// 重置冷却时间
 		}
+		
 	}
 }

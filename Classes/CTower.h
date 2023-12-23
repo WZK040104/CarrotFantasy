@@ -1,8 +1,8 @@
 #pragma once
 #include "CEnemy.h"
 #include <vector>
-#include"cocos2d.h"
 #define MAXlevel 4
+#include"cocos2d.h"
 using namespace std;
 
 class CTower	//防御塔属性
@@ -63,14 +63,14 @@ public:
 		group_damage = input_group_damage;
 	}
 
-	void upgrade(int& gold_coins);	//升级
+	bool upgrade(int& gold_coins);	//升级
 	virtual void attack(vector<CEnemy>& enemy,int damage_per_time);	//攻击
 	void setPosition(int x, int y);	//建筑安放坐标
 	int getType() const;			//获取种类
 	int getLevel() const;			//获取等级
 	int getDamage() const;			//获取伤害
 	int getAttackRange() const;		//获取攻击范围
-	bool inRange(const CEnemy& enemy);//敌人是否在范围内
+	bool inRange(CEnemy& enemy);//敌人是否在范围内
 	int getUpgradeCost() const;		//获取升级需要的钱
 	double getPositionX();		//获取x坐标
 	double getPositionY();		//获取y坐标

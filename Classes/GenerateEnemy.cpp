@@ -1,13 +1,14 @@
 #include"CEnemy.h"
 #include"Enemy_kind.h"
+#include"GenerateEnemy.h"
 #include<vector>
 #include <chrono> // for std::chrono::seconds
 #include <thread> // for std::this_thread::sleep_for
 using namespace std;
 
-vector<CEnemy> EnemyExist;
+vector<CEnemy*> EnemyExist;
 
-void generateOneEnemy(vector<CEnemy>& EnemyExist, int enemyType, double x, double y)//在怪物出生点生成一只怪物
+void GenerateEnemy::generateOneEnemy(vector<CEnemy*>& EnemyExist, int enemyType, double x, double y)//在怪物出生点生成一只怪物
 {
 	CEnemy* newEnemy = nullptr;
 
@@ -38,29 +39,33 @@ void generateOneEnemy(vector<CEnemy>& EnemyExist, int enemyType, double x, doubl
     {
 		newEnemy->set_x(x);
 		newEnemy->set_y(y);
-        EnemyExist.push_back(*newEnemy);
+        EnemyExist.push_back(newEnemy);
         delete newEnemy;
     }
 }
 
-void deleteEnemy(vector<CEnemy>& EnemyExist)//删去死去的敌人
+void GenerateEnemy::deleteEnemy(vector<CEnemy*>& EnemyExist)//删去死去的敌人
 {
-	for (int i = 0; i < EnemyExist.size(); i++)
+	for (auto it = EnemyExist.begin(); it != EnemyExist.end();)
 	{
-		if (EnemyExist[i].alive() == 0)
+		if (!(*it)->alive())
 		{
-			auto it = EnemyExist.begin() + i;
-			EnemyExist.erase(it);
+			delete *it;
+			it = EnemyExist.erase(it);
+		}
+		else
+		{
+			++it;
 		}
 	}
 }
 
-int numofEnemyAlive(vector<CEnemy>& EnemyExist)
+int GenerateEnemy::numofEnemyAlive(vector<CEnemy*>& EnemyExist)
 {
 	int num = 0;
-	for (int i = 0; i < EnemyExist.size(); i++)
+	for (auto enemy : EnemyExist)
 	{
-		if (EnemyExist[i].alive() == 1)
+		if (enemy->alive())
 		{
 			num++;
 		}
@@ -69,7 +74,7 @@ int numofEnemyAlive(vector<CEnemy>& EnemyExist)
 	return num;
 }
 
-void generateflag(int flag, vector<vector<int>> Enemyflag, double x, double y)//生成一个波次的怪物，起始坐标为xy
+void GenerateEnemy::generateflag(int flag, vector<vector<int>> Enemyflag, double x, double y)//生成一个波次的怪物，起始坐标为xy
 {
 	for (int i = 0; i < Enemyflag[flag].size(); i++)
 	{
