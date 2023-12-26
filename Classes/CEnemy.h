@@ -10,7 +10,7 @@ private:
 	int add_coins;				//怪物死之后增加的金币
 	double enemy_position_x;	//怪物的横坐标
 	double enemy_position_y;	//怪物的纵坐标
-
+	
 public:
 	//构造函数
 	CEnemy();
@@ -27,11 +27,15 @@ public:
 	void set_x(double input_x);
 	void set_y(double input_y);
 	void HP_calculate(int damage_per_time);
+	void setHP();
 	float get_velocity();
+	float getHPpercentage();
 	int enemytype;
-	void update1();
-	void update2();
 	cocos2d::Sprite* enemySprite; //怪物的精灵
 	cocos2d::Sprite* getSprite();
+	cocos2d::ProgressTimer* enemyHealthbar;//怪物血条
+	cocos2d::Sprite* enemyHealthbar_back;
+	//cocos2d::Sprite* getHealthbar();
+	//cocos2d::Sprite* getHealthbar_back();
 };
 

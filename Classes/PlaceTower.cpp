@@ -37,6 +37,4 @@ void placeTower(vector<CTower>& TowerExist, int towerType, int x, int y)
         TowerExist.push_back(*newTower);
         delete newTower;
     }
-
 }
-

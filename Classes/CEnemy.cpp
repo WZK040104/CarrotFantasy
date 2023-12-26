@@ -22,24 +22,35 @@ void CEnemy::initial(int input_type,int input_HP, float input_velocity, int inpu
 
 	switch (input_type)
 	{
+	case -1:
+		enemySprite = nullptr;
+		enemyHealthbar= nullptr;
+		enemyHealthbar_back= nullptr;
 	case 1:
 		enemySprite = cocos2d::Sprite::create("Enemy_one.png");
+		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
+		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
 		break;
 	case 2:
 		enemySprite = cocos2d::Sprite::create("Enemy_two.png");
+		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
+		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
 		break;
 	case 3:
 		enemySprite = cocos2d::Sprite::create("Enemy_three.png");
+		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
+		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
 		break;
 	case 4:
 		enemySprite = cocos2d::Sprite::create("Enemy_four.png");
+		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
+		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
 		break;
 	default:
 		break;
 	}
-	
-	enemySprite -> setPosition(cocos2d::Vec2(400, 75));
 }
+
 bool CEnemy::alive()  //是否活着
 {
 	if (HP <= 0)
@@ -48,6 +59,11 @@ bool CEnemy::alive()  //是否活着
 		return false;
 	}
 	return true;
+}
+float CEnemy::getHPpercentage()
+{
+	float x = float(HP) / float(enemy_HP);
+	return x;
 }
 double CEnemy::EnemyPositionX()
 {
@@ -73,57 +89,20 @@ float CEnemy::get_velocity()
 {
 	return velocity;
 }
-//void CEnemy::update1()
-//{
-//	// 根据怪物的速度和时间间隔更新怪物的位置
-//	double new_x;// 根据速度和时间间隔计算新的横坐标
-//	double new_y;
-//	if (alive())
-//	{
-//		if (EnemyPositionX() >= 260 && EnemyPositionY() == 75)
-//			new_x = EnemyPositionX() - velocity * 0.01;
-//		else if (EnemyPositionX() >= 259 && EnemyPositionY() >= 75 && EnemyPositionY() <= 245)
-//			new_y = EnemyPositionY() + velocity * 0.01;
-//		else if (EnemyPositionY() <= 246 && EnemyPositionX() < 261 && EnemyPositionX() > 102)
-//			new_x = EnemyPositionX() - velocity * 0.01;
-//		else if (EnemyPositionX() <= 102)
-//		{
-//			HP -= 10000;
-//		}
-//		set_x(new_x);
-//		set_y(new_y);
-//	}
-//
-//}
-//
-//void CEnemy::update2()
-//{
-//	// 根据怪物的速度和时间间隔更新怪物的位置
-//	double new_x;// 根据速度和时间间隔计算新的横坐标
-//	double new_y;
-//	if (alive())
-//	{
-//		if (EnemyPositionX() >= 162 && EnemyPositionY() == 72)
-//			new_x = EnemyPositionX() - velocity * 0.01;
-//		else if (EnemyPositionX() >= 161 && EnemyPositionY() >= 72 && EnemyPositionY() <= 160)
-//			new_y = EnemyPositionY() + velocity * 0.01;
-//		else if (EnemyPositionY() <= 161 && EnemyPositionX() >= 161 && EnemyPositionX() <= 366)
-//			new_x = EnemyPositionX() + velocity * 0.01;
-//		else if (EnemyPositionX() <= 367 && EnemyPositionY() >= 160 && EnemyPositionY() <= 248)
-//			new_y = EnemyPositionY() + velocity * 0.01;
-//		else if (EnemyPositionY() <= 249 && EnemyPositionX() >= 120 && EnemyPositionX() <= 367)
-//			new_x = EnemyPositionX() - velocity * 0.01;
-//		else if (EnemyPositionX() <= 120 && EnemyPositionY() <= 249)
-//		{
-//			HP -= 10000;
-//		}
-//		set_x(new_x);
-//		set_y(new_y);
-//	}
-//
-//}
 
 cocos2d::Sprite* CEnemy::getSprite()
 {
 	return enemySprite;
+}
+//cocos2d::Sprite* CEnemy::getHealthbar()
+//{
+//	return enemyHealthbar;
+//}
+//cocos2d::Sprite* CEnemy::getHealthbar_back()
+//{
+//	return enemyHealthbar_back;
+//}
+void CEnemy::setHP()
+{
+	HP = 5;
 }

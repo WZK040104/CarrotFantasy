@@ -5,6 +5,8 @@
 #include "cocos/math/Vec2.h"
 #include "AudioEngine.h"
 #include "CEnemy.h"
+#include <vector>
+using namespace std;
 USING_NS_CC;
 
 extern int current_gold_coins;
@@ -24,8 +26,8 @@ public:
 	cocos2d::Label* mapnum;
 	// 暂停
 	void Pause(Ref* pSender);
-	// 游戏通关
-	void Success(Ref* pSender);
+	// 游戏失败
+	void Default(Ref* pSender);
 	//点击侧边防御塔并放置
 	void onMouseDown(cocos2d::EventMouse* event);
 	void onMouseDown1(cocos2d::EventMouse* event);
@@ -59,7 +61,6 @@ public:
 	int getTowerUpgradeCoins(int towerType);
 	//更新金币的数值
 	void updateGoldCoinsDisplay();
-
 	//金币不足的标
 	cocos2d::Label* insufficientGoldLabel;
 	//显示金币不足
@@ -85,6 +86,15 @@ public:
 	void showTowerGrey();
 	// 定时器倒数
 	virtual void step(float Dt);
+
+	vector<int> flags;
+	int current_flag;
+	//生成一个敌人
+	void generateOneEnemy(vector<CEnemy*>& EnemyExist, int enemyType, double x, double y);
+	//生成一个波次的怪物，起始坐标为xy
+	void generateflag(vector<int> flags, double x, double y);
+	bool start_generate;
+	void startgenerate(float dt);
 	//更新敌人坐标
 	void Enemyupdate(float dt);
 
@@ -103,8 +113,8 @@ public:
 	cocos2d::Label* mapnum;
 	// 暂停
 	void Pause(Ref* pSender);
-	// 游戏通关
-	void Success(Ref* pSender);
+	// 游戏失败
+	void Default(Ref* pSender);
 	//点击侧边防御塔并放置
 	void onMouseDown(cocos2d::EventMouse* event);
 	void onMouseDown1(cocos2d::EventMouse* event);
@@ -113,13 +123,11 @@ public:
 	//侧边防御塔的显示
 	void createTower0(const std::string& towerImage, const std::string& towerBackImage,
 		int upgradeCoins, float positionY, int index);
-
 	// 添加侧边防御塔的图标
 	cocos2d::Sprite* tower_zero0;
 	cocos2d::Sprite* tower_one0;
 	cocos2d::Sprite* tower_two0;
 	cocos2d::Sprite* tower_three0;
-
 	cocos2d::Sprite* tower_back0;
 	cocos2d::Sprite* tower_back1;
 	cocos2d::Sprite* tower_back2;
@@ -130,13 +138,13 @@ public:
 	cocos2d::Label* buildcoins2;
 	cocos2d::Label* buildcoins3;
 	//cocos2d::Label* buildcoins[4];
-
 	// 防御塔组件图标
 	cocos2d::Node* layout_delete;
 	cocos2d::Node* layout_uplevel;
 	cocos2d::Node* layout_return;
 	cocos2d::Label* layout_coin;
 	cocos2d::Label* layout_nowlevel;
+
 	// 判断是否点击到侧边防御塔
 	int checkTower0Clicked(const cocos2d::Vec2& touchLocation);
 	//建造所需要的钱
@@ -167,9 +175,19 @@ public:
 	void showInsufficientLevelLabel();
 	// 定时器倒数
 	virtual void step(float Dt);
+
+	vector<int> flags;
+	int current_flag;
+	//生成一个敌人
+	void generateOneEnemy(vector<CEnemy*>& EnemyExist, int enemyType, double x, double y);
+	//生成一个波次的怪物，起始坐标为xy
+	void generateflag(vector<int> flags, double x, double y);
+	bool start_generate;
+	void startgenerate(float dt);
 	//更新敌人坐标
 	void Enemyupdate(float dt);
 	// implement the "static create()" method manually
 	CREATE_FUNC(Game_two);
 };
+
 #endif
