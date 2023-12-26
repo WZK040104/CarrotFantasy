@@ -2,17 +2,18 @@
 #include "StartScene.h"
 #include "ui/CocosGUI.h"
 #include "AudioEngine.h"
+
 using namespace cocos2d::experimental;
 using namespace cocos2d::ui;
 
 USING_NS_CC;
 
-bool map_one_finish = false;
-bool map_two_finish = false;
-bool map_two_unlock = false;
-bool map_one_continue = false;
-bool map_two_continue = false;
-bool sound = true;
+bool map_one_finish = false; // 第一关是否完成
+bool map_two_finish = false; // 第二关是否完成
+bool map_two_unlock = false; // 第二关是否解锁
+bool map_one_continue = false; // 第一关是否正在进行
+bool map_two_continue = false; // 第二关是否正在进行
+bool sound = true; // 声音是否开启
 int backgroundAudioID;
 
 Scene* Start::createScene()
@@ -53,7 +54,7 @@ bool Start::init()
 		this->addChild(startBackground, 0);
 	}
 
-	/* 开始游戏按钮 */
+	// 开始游戏按钮
 	auto startItem = Button::create("StartButton.png", "StartButton_selected.png");
 
 	if (startItem == nullptr
@@ -85,7 +86,7 @@ bool Start::init()
 	});
 	this->addChild(startItem);
 
-	/* 关闭游戏按钮 */
+	// 关闭游戏按钮
 	auto closeItem = Button::create("EndButton.png", "EndButton_selected.png");
 
 	if (closeItem == nullptr
@@ -113,11 +114,6 @@ bool Start::init()
 			#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
 				exit(0);
 			#endif
-
-			/*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
-
-			//EventCustom customEndEvent("game_scene_close_event");
-			//_eventDispatcher->dispatchEvent(&customEndEvent);
 		}
 			break;
 		default:
@@ -126,7 +122,7 @@ bool Start::init()
 	});
 	this->addChild(closeItem);
 
-	/* 开启声音按钮 */
+	// 开启声音按钮
 	auto soundItem = MenuItemToggle::createWithCallback(CC_CALLBACK_1(Start::openAndCloseSound, this),
 		MenuItemImage::create("SoundButton.png","SoundButton.png"),
 		MenuItemImage::create("SoundCloseButton.png", "SoundCloseButton.png"),nullptr);
@@ -151,6 +147,7 @@ bool Start::init()
 	return true;
 }
 
+// 背景音乐开启与关闭
 void Start::openAndCloseSound(Ref *pSender)
 {
 	if (!sound) {

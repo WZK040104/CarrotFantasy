@@ -6,6 +6,12 @@
 USING_NS_CC;
 
 extern int countnum;
+extern bool map_one_finish;
+extern bool map_two_finish;
+extern bool map_one_continue;
+extern bool map_two_continue;
+extern int carrot_level;
+extern int carrot_HP;
 
 Scene* GameEnd::scene(RenderTexture* sqr)
 {
@@ -23,11 +29,6 @@ Scene* GameEnd::scene(RenderTexture* sqr)
 	scene->addChild(back_sqr);
 	return scene;
 }
-
-extern bool map_one_finish;
-extern bool map_two_finish;
-extern bool map_one_continue;
-extern bool map_two_continue;
 
 bool GameEnd::init()
 {
@@ -73,6 +74,9 @@ void GameEnd::ContinueGame(Ref *pSender)
 {
 	TowerExist.clear();
 	countnum = 20;
+	carrot_level = 1;
+	carrot_HP = 5;
+
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
@@ -99,6 +103,9 @@ void GameEnd::ReturnMenuGame(Ref *pSender)
 {
 	TowerExist.clear();
 	countnum = 20;
+	carrot_level = 1;
+	carrot_HP = 5;
+
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();

@@ -1,9 +1,12 @@
-#pragma once
+#ifndef __GENERATE__ENEMY__H__
+#define __GENERATE__ENEMY__H__
+
 #include"CEnemy.h"
 #include"Enemy_kind.h"
 #include<vector>
 #include <chrono> // for std::chrono::seconds
 #include <thread> // for std::this_thread::sleep_for
+
 using namespace std;
 
 extern vector<CEnemy*> EnemyExist;
@@ -18,13 +21,12 @@ public:
 
 	cocos2d::Scene* _currentScene;
 	vector<vector<int>> _enemyWaves;
-	int _currentWave;
-	int _currentEnemyIndex;
+	unsigned int _currentWave;
+	unsigned int _currentEnemyIndex;
 	double _startX, _startY;
 	GenerateEnemy(cocos2d::Scene* scene, const vector<vector<int>>& waves, double startX, double startY)
-		: _currentScene(scene), _enemyWaves(waves), _currentWave(0), _currentEnemyIndex(0), _startX(startX), _startY(startY)
-	{
-	}
+		: _currentScene(scene), _enemyWaves(waves), _currentWave(0),
+		_currentEnemyIndex(0), _startX(startX), _startY(startY){}
 	void startGenerating()
 	{
 		this->schedule([this](float) {
@@ -43,5 +45,5 @@ public:
 			}
 		}, 0.5f, "generateEnemy_key");
 	}
-
 };
+#endif

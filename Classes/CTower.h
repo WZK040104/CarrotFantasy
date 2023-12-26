@@ -1,8 +1,12 @@
-#pragma once
+#ifndef __TOWER__H__
+#define __TOWER__H__
+
 #include "CEnemy.h"
 #include <vector>
-#define MAXlevel 4
 #include"cocos2d.h"
+
+#define MAXlevel 4
+
 using namespace std;
 
 class CTower	//防御塔属性
@@ -21,7 +25,6 @@ private:
 
 	
 public:
-	// 构造函数
 	CTower()
 	{
 		// 初始化
@@ -42,12 +45,14 @@ public:
 		group_damage = 0;
 		last_attack_Time = 0;
 	}
-	// 析构函数
+
 	~CTower() {
 		// 对象销毁时执行的清理工作，例如释放资源
 	}
 
-	void initial(int input_tower_level, int input_coins_to_level_up[], int input_damage_per_time[],double input_time_between_attack[], double input_attck_range[],bool input_group_damage) //初始化怪物的生命值,速度，金币
+	void initial(int input_tower_level, int input_coins_to_level_up[],
+		int input_damage_per_time[],double input_time_between_attack[],
+		double input_attck_range[],bool input_group_damage) //初始化怪物的生命值,速度，金币
 	{
 		tower_level= input_tower_level;
 		for (int i = 0; i < MAXlevel; i++)
@@ -63,18 +68,19 @@ public:
 		group_damage = input_group_damage;
 	}
 
-	bool upgrade(int& gold_coins);	//升级
-	virtual void attack(vector<CEnemy>& enemy,int damage_per_time);	//攻击
-	void setPosition(int x, int y);	//建筑安放坐标
-	int getType() const;			//获取种类
-	int getLevel() const;			//获取等级
-	int getDamage() const;			//获取伤害
-	int getAttackRange() const;		//获取攻击范围
-	bool inRange(CEnemy& enemy);//敌人是否在范围内
-	int getUpgradeCost() const;		//获取升级需要的钱
-	double getPositionX();		//获取x坐标
-	double getPositionY();		//获取y坐标
-	double getTimeCooldown() const;	//获取冷却时间
-	void resetCooldown();			//冷却时间
-	double get_last_attack_Time();	//上次攻击时间
+	bool upgrade(int& gold_coins);	// 升级
+	virtual void attack(vector<CEnemy>& enemy,int damage_per_time);	// 攻击
+	void setPosition(int x, int y);	// 建筑安放坐标
+	int getType() const;			// 获取种类
+	int getLevel() const;			// 获取等级
+	int getDamage() const;			// 获取伤害
+	int getAttackRange() const;		// 获取攻击范围
+	bool inRange(CEnemy& enemy);    // 敌人是否在范围内
+	int getUpgradeCost() const;		// 获取升级需要的钱
+	double getPositionX();		    // 获取x坐标
+	double getPositionY();		    // 获取y坐标
+	double getTimeCooldown() const;	// 获取冷却时间
+	void resetCooldown();			// 冷却时间
+	double get_last_attack_Time();	// 上次攻击时间
 };
+#endif

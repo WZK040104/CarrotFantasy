@@ -1,8 +1,31 @@
-#pragma once
+#ifndef __TOWER__KIND__H__
+#define __TOWER__KIND__H__
+
 #include "CTower.h"
 #include <ctime>  // 用于时间相关的操作
 #include <vector>
+
 using namespace std;
+
+extern int tower0_upgrade_coins[MAXlevel + 1];
+extern int tower0_attack[MAXlevel + 1];
+extern double tower0_timebetween_attack[MAXlevel + 1];
+extern double tower0_attack_range[MAXlevel + 1];
+
+extern int tower1_upgrade_coins[MAXlevel + 1];
+extern int tower1_attack[MAXlevel + 1];
+extern double tower1_timebetween_attack[MAXlevel + 1];
+extern double tower1_attack_range[MAXlevel + 1];
+
+extern int tower2_upgrade_coins[MAXlevel + 1];
+extern int tower2_attack[MAXlevel + 1];
+extern double tower2_timebetween_attack[MAXlevel + 1];
+extern double tower2_attack_range[MAXlevel + 1];
+
+extern int tower3_upgrade_coins[MAXlevel + 1];
+extern int tower3_attack[MAXlevel + 1];
+extern double tower3_timebetween_attack[MAXlevel + 1];
+extern double tower3_attack_range[MAXlevel + 1];
 
 class Tower0 : public CTower
 {
@@ -62,23 +85,4 @@ public:
 		}
 	}
 };
-
-extern int tower0_upgrade_coins[MAXlevel+1];
-extern int tower0_attack[MAXlevel + 1];
-extern double tower0_timebetween_attack[MAXlevel + 1];
-extern double tower0_attack_range[MAXlevel + 1];
-
-extern int tower1_upgrade_coins[MAXlevel+1];
-extern int tower1_attack[MAXlevel + 1];
-extern double tower1_timebetween_attack[MAXlevel + 1];
-extern double tower1_attack_range[MAXlevel + 1];
-
-extern int tower2_upgrade_coins[MAXlevel+1];
-extern int tower2_attack[MAXlevel + 1];
-extern double tower2_timebetween_attack[MAXlevel + 1];
-extern double tower2_attack_range[MAXlevel + 1];
-
-extern int tower3_upgrade_coins[MAXlevel+1];
-extern int tower3_attack[MAXlevel + 1];
-extern double tower3_timebetween_attack[MAXlevel + 1];
-extern double tower3_attack_range[MAXlevel + 1];
+#endif

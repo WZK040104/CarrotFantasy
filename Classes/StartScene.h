@@ -7,13 +7,10 @@ class Start : public cocos2d::Scene
 {
 public:
 	static cocos2d::Scene* createScene();
-
 	virtual bool init();
-
 	// ¿ªÆôºÍ¹Ø±ÕÉùÒô
 	void openAndCloseSound(Ref *pSender);
 	// implement the "static create()" method manually
 	CREATE_FUNC(Start);
 };
-
 #endif

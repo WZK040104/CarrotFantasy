@@ -1,11 +1,14 @@
 #include "GameScene.h"
 #include "Gamepause.h"
-#include "Externgame.h"
 #include "PlaceTower.h"
 
 USING_NS_CC;
 
 extern int countnum;
+extern bool map_one_continue;
+extern bool map_two_continue;
+extern int carrot_level;
+extern int carrot_HP;
 
 Scene* Gamepause::scene(RenderTexture* sqr)
 {
@@ -80,6 +83,9 @@ void Gamepause::RestartGame(Ref *pSender)
 {
 	TowerExist.clear();
 	countnum = 20;
+	carrot_level = 1;
+	carrot_HP = 5;
+
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	if (map_one_continue) {
@@ -97,6 +103,9 @@ void Gamepause::ReturnMenuGame(Ref *pSender)
 {
 	TowerExist.clear();
 	countnum = 20;
+	carrot_level = 1;
+	carrot_HP = 5;
+
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	if (map_one_continue)

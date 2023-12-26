@@ -1,4 +1,4 @@
-#include"Tower_kind.h"
+#include "Tower_kind.h"
 
 int tower0_upgrade_coins[MAXlevel+1] = { 20,40,60,100,0 };						//一级升二级的钱为tower0_upgrade_coins[1]		普通炮台
 int tower0_attack[MAXlevel + 1] = { 0,5,15,25,40 }; 						//一级的伤害为tower0_attack[1]
@@ -30,15 +30,12 @@ Tower1::Tower1() {
 }
 Tower1::~Tower1() {}
 
-
 Tower2::Tower2() {
 	initial(1, tower0_upgrade_coins, tower0_attack, tower0_timebetween_attack, tower0_attack_range, 0);
 }
 Tower2::~Tower2() {}
 
-
 Tower3::Tower3() {
 	initial(1, tower0_upgrade_coins, tower0_attack, tower0_timebetween_attack, tower0_attack_range, 0);
 }
 Tower3::~Tower3() {}
-

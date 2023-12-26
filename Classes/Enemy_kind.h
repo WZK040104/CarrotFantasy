@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __ENEMY__KIND__H__
+#define __ENEMY__KIND__H__
+
 #include "CEnemy.h"
 
 class Enemy0 : public CEnemy 
@@ -35,3 +37,4 @@ public:
     Enemy4();
     virtual ~Enemy4();
 };
+#endif

@@ -6,6 +6,8 @@
 USING_NS_CC;
 
 extern int countnum;
+extern int carrot_level;
+extern int carrot_HP;
 
 Scene* GameDefault::scene(RenderTexture* sqr)
 {
@@ -73,6 +75,9 @@ void GameDefault::ReturnMenuGame(Ref *pSender)
 {
 	TowerExist.clear();
 	countnum = 20;
+	carrot_level = 1;
+	carrot_HP = 5;
+
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
@@ -91,6 +96,9 @@ void GameDefault::RestartGame(Ref *pSender)
 {
 	TowerExist.clear();
 	countnum = 20;
+	carrot_level = 1;
+	carrot_HP = 5;
+
 	Director::getInstance()->popScene();
 	Director::getInstance()->popScene();
 	if (map_one_continue) {

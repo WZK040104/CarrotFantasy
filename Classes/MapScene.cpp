@@ -9,21 +9,20 @@ using namespace cocos2d::ui;
 
 USING_NS_CC;
 
+extern bool map_one_finish;
+extern bool map_two_finish;
+extern bool map_two_unlock;
+
 Scene* MyMap::createScene()
 {
 	return MyMap::create();
 }
 
-// Print useful error message instead of segfaulting when files are not there.
 static void problemLoading(const char* filename)
 {
 	printf("Error while loading: %s\n", filename);
 	printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
-
-extern bool map_one_finish;
-extern bool map_two_finish;
-extern bool map_two_unlock;
 
 bool MyMap::init()
 {
@@ -89,7 +88,7 @@ bool MyMap::init()
 		this->addChild(mapBackground, 0);
 	}
 
-	/* 地图一 */
+	// 地图一
 	auto map_one = Button::create("Map_one.png", "Map_one_selected.png");
 
 	if (map_one == nullptr
@@ -121,7 +120,7 @@ bool MyMap::init()
 	});
 	this->addChild(map_one);
 
-	/* 是否完成与是否解锁的标志 */
+	// 是否完成与是否解锁的标志
 	if (map_one_finish) {
 		auto finish_one = Sprite::create("Finish.png");
 		if (finish_one == nullptr)
@@ -143,7 +142,7 @@ bool MyMap::init()
 		}
 	}
 
-	/* 地图二 */
+	// 地图二
 	auto map_two = Button::create("Map_two.png", "Map_two_selected.png", "Map_two_unlocked.png");
 
 	if (map_two == nullptr
@@ -163,7 +162,7 @@ bool MyMap::init()
 		map_two->setBright(false);
 		map_two->setTouchEnabled(false);
 	}
-	
+
 	map_two->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
 		switch (type)
 		{
@@ -180,7 +179,7 @@ bool MyMap::init()
 	});
 	this->addChild(map_two);
 
-	/* 是否完成与是否解锁的标志 */
+	// 是否完成与是否解锁的标志
 	if (map_two_unlock) {
 		if (map_two_finish) {
 			auto finish_two = Sprite::create("Finish.png");
