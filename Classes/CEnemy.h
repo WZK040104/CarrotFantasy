@@ -22,6 +22,7 @@ public:
 	// ÊÇ·ñ»î×Å
 	bool alive(); 
 
+	int getadd_coins();
 	double EnemyPositionX();
 	double EnemyPositionY();
 	void set_x(double input_x);

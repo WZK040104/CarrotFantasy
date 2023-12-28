@@ -105,16 +105,11 @@ cocos2d::Sprite* CEnemy::getSprite()
 	return enemySprite;
 }
 
-//cocos2d::Sprite* CEnemy::getHealthbar()
-//{
-//	return enemyHealthbar;
-//}
-//cocos2d::Sprite* CEnemy::getHealthbar_back()
-//{
-//	return enemyHealthbar_back;
-//}
-
 void CEnemy::setHP()
 {
 	HP = 5;
+}
+int CEnemy::getadd_coins()
+{
+	return add_coins;
 }

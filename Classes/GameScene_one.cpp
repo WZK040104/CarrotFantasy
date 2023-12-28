@@ -92,6 +92,7 @@ bool Game_one::init()
 	current_gold_coins = 1000;
 	start_generate = false;
 	current_flag = 1;
+	carrot_HP = 5;
 
 	if (!Scene::init())
 	{
@@ -531,6 +532,7 @@ bool Game_one::init()
 	// 每帧调用 update 函数
 	this->scheduleOnce(CC_SCHEDULE_SELECTOR(Game_one::startgenerate), 5.0f);
 	this->schedule(CC_SCHEDULE_SELECTOR(Game_one::Enemyupdate), 1.0f / 60.0f);
+	this->schedule(CC_SCHEDULE_SELECTOR(Game_one::TowerAttack), 1.0f);
 	return true;
 }
 
@@ -594,13 +596,15 @@ void Game_one::Enemyupdate(float dt)// 访问全体存在的怪物并且更改其坐标
 					(*it_enmey)->enemyHealthbar_back->setVisible(true);
 					(*it_enmey)->enemyHealthbar->setVisible(true);
 				}
-
 			}
 			else
 			{
 				// 移除怪物精灵和删除怪物对象
 				if ((*it_enmey)->enemySprite)
 				{
+					current_gold_coins += (*it_enmey)->getadd_coins();
+					updateGoldCoinsDisplay();
+					showTowerGrey();
 					(*it_enmey)->enemySprite->removeFromParent();
 					(*it_enmey)->enemyHealthbar->removeFromParent();
 					(*it_enmey)->enemyHealthbar_back->removeFromParent();
@@ -685,6 +689,91 @@ void Game_one::generateflag(vector<int> flags, double x, double y)
 	for (unsigned int i = 0; i < flags.size(); i++)
 	{
 		generateOneEnemy(EnemyExist, flags[i], x, y);
+	}
+}
+
+void Game_one::TowerAttack(float dt)
+{
+	for (auto tower_it = TowerExist.begin(); tower_it != TowerExist.end(); ++tower_it)
+	{
+		CTower* tower = *tower_it;
+		vector<CEnemy*> inRangeEnemies;
+		CEnemy* enemy;
+		CEnemy* target;
+		for (auto enemy_it = EnemyExist.begin(); enemy_it != EnemyExist.end(); ++enemy_it)
+		{
+			enemy = *enemy_it;
+			if (tower->inRange(enemy)&& enemy->EnemyPositionX()<=420)
+			{
+				inRangeEnemies.push_back(enemy);
+			}
+		}
+
+		bool flag = tower->attack(inRangeEnemies, tower->getDamage(), target);
+		auto rotateTo = RotateTo::create(2.0f, 2160.0f);
+		auto scaleBy = ScaleBy::create(3.0f, 0.5f);
+
+		if (flag) {
+			switch (tower->getType()) {
+			case 0:
+				bulletSprite = Sprite::create("Magicball.png");
+				break;
+			case 1:
+				bulletSprite = Sprite::create("Shuriken.png");
+				bulletSprite->runAction(rotateTo);
+				break;
+			case 2:
+				bulletSprite = Sprite::create("Snowball.png");
+				break;
+			case 3: {
+				bulletSprite = Sprite::create("Sunflower.png");
+				bulletSprite->runAction(scaleBy);
+			}
+				break;
+			default:
+				break;
+			}
+			bulletSprite->setPosition(Vec2(tower->getPositionX(), tower->getPositionY()));
+			this->addChild(bulletSprite, 2);
+
+			Bullet bullet;
+			bullet.Tower = tower;
+			bullet.Enemy = target;
+			bullet.bulletsprite = bulletSprite;
+			bullet.flag = false;
+			allBulletArray.push_back(bullet);
+
+			// 更新子弹速度
+			schedule(CC_SCHEDULE_SELECTOR(Game_one::moveBullet), 1.0f / 60.0f);	
+		}
+	}
+}
+
+// 移动子弹
+void Game_one::moveBullet(float dt) {
+	for (auto it = allBulletArray.begin(); it != allBulletArray.end(); it++) {
+		if ((*it).Tower->getType() != 3) {
+			// 更新位置
+			(*it).bulletsprite->setPositionX((*it).bulletsprite->getPositionX() +
+				((*it).Enemy->EnemyPositionX() - (*it).Tower->getPositionX()) * dt*2);
+			(*it).bulletsprite->setPositionY((*it).bulletsprite->getPositionY() +
+				((*it).Enemy->EnemyPositionY() - (*it).Tower->getPositionY()) * dt*2);
+
+			// 如果已到达消失位置，就移除该子弹
+			if (fabs((*it).bulletsprite->getPositionX() - (*it).Enemy->EnemyPositionX()) < 15 &&
+				fabs((*it).bulletsprite->getPositionY() - (*it).Enemy->EnemyPositionY()) < 15) {
+				(*it).bulletsprite->setVisible(false);
+				bulletSprite->removeChild((*it).bulletsprite, true);
+				if (!(*it).flag) {
+					(*it).Enemy->HP_calculate((*it).Tower->getDamage());
+					(*it).flag = true;
+				}	
+			}
+		}
+		else {
+			(*it).bulletsprite->setVisible(false);
+			bulletSprite->removeChild((*it).bulletsprite, true);
+		}
 	}
 }
 
@@ -840,7 +929,7 @@ bool deal_with_xy1(double &x ,double& y)
 
 	for (unsigned int i = 0; i < TowerExist.size(); i++)
 	{
-		if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY())
+		if (x == TowerExist[i]->getPositionX() && y == TowerExist[i]->getPositionY())
 			return 0;
 	}
 
@@ -903,8 +992,9 @@ void Game_one::onMouseDown(EventMouse* event)
 			towerSprite->setPosition(towerPosition);
 			// 每个防御塔及其相关组件都被命名为他们的坐标
 			// 因此可以通过鼠标点击的坐标来找到相应的防御塔
-			char*name1 = new char[15], *name2 = new char[15], *name3 = new char[15],
-				*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+			char*name1 = new char[20], *name2 = new char[20], *name3 = new char[20],
+				*name4 = new char[20], *name5 = new char[20], *name6 = new char[20],
+				*name7 = new char[20];
 
 			sprintf(name1, "%d%d", int(x), int(y));
 			this->addChild(towerSprite, 1, name1);
@@ -946,12 +1036,20 @@ void Game_one::onMouseDown(EventMouse* event)
 			sprintf(name6, "%d%d_l", int(x), int(y));
 			this->addChild(towerlevel, 2, name6);
 
+			// 防御塔攻击范围
+			auto towerrange = Sprite::create("range.png");
+			towerrange->setVisible(false);
+			towerrange->setPosition(Vec2(towerPosition.x, towerPosition.y));
+			sprintf(name7, "%d%d_g", int(x), int(y));
+			this->addChild(towerrange, 2, name7);
+
 			delete[]name1;
 			delete[]name2;
 			delete[]name3;
 			delete[]name4;
 			delete[]name5;
 			delete[]name6;
+			delete[]name7;
 
 			// 点击防御塔
 			towerSprite->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
@@ -964,8 +1062,10 @@ void Game_one::onMouseDown(EventMouse* event)
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
 				case ui::Widget::TouchEventType::ENDED: {
-					char*name2 = new char[15], *name3 = new char[15],
-						*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+					char*name2 = new char[20], *name3 = new char[20],
+						*name4 = new char[20], *name5 = new char[20],
+						*name6 = new char[20], *name7 = new char[20];
+
 					sprintf(name2, "%d%d_d", int(x), int(y));
 					layout_delete = this->getChildByName(name2);
 
@@ -981,22 +1081,26 @@ void Game_one::onMouseDown(EventMouse* event)
 					sprintf(name6, "%d%d_l", int(x), int(y));
 					layout_nowlevel = (Label*)(getChildByName(name6));
 
+					sprintf(name7, "%d%d_g", int(x), int(y));
+					layout_range = (Sprite*)(getChildByName(name7));
+
 					delete[]name2;
 					delete[]name3;
 					delete[]name4;
 					delete[]name5;
 					delete[]name6;
+					delete[]name7;
 
 					// 迭代器寻找所选的防御塔
 					auto it = TowerExist.begin();
 					int i = 0;
 					while (it != TowerExist.end())
 					{
-						if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY()) {
-							int money = TowerExist[i].getUpgradeCost();
+						if (x == TowerExist[i]->getPositionX() && y == TowerExist[i]->getPositionY()) {
+							int money = TowerExist[i]->getUpgradeCost();
 							layout_coin->setString(std::to_string(money));
 							char* levelname = new char[10];
-							sprintf(levelname, "Lv.%d", TowerExist[i].getLevel());
+							sprintf(levelname, "Lv.%d", TowerExist[i]->getLevel());
 							layout_nowlevel->setString(levelname);
 							delete levelname;
 							break;
@@ -1013,6 +1117,7 @@ void Game_one::onMouseDown(EventMouse* event)
 					layout_return->setVisible(true);
 					layout_coin->setVisible(true);
 					layout_nowlevel->setVisible(true);
+					layout_range->setVisible(true);
 				}
 					break;
 				default:
@@ -1031,8 +1136,9 @@ void Game_one::onMouseDown(EventMouse* event)
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
 				case ui::Widget::TouchEventType::ENDED: {
-					char*name2 = new char[15], *name3 = new char[15],
-						*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+					char*name2 = new char[20], *name3 = new char[20],
+						*name4 = new char[20], *name5 = new char[20],
+						*name6 = new char[20], *name7 = new char[20];
 					sprintf(name2, "%d%d_d", int(x), int(y));
 					layout_delete = this->getChildByName(name2);
 
@@ -1048,11 +1154,15 @@ void Game_one::onMouseDown(EventMouse* event)
 					sprintf(name6, "%d%d_l", int(x), int(y));
 					layout_nowlevel = (Label*)(getChildByName(name6));
 
+					sprintf(name7, "%d%d_g", int(x), int(y));
+					layout_range = (Sprite*)(getChildByName(name7));
+
 					delete[]name2;
 					delete[]name3;
 					delete[]name4;
 					delete[]name5;
 					delete[]name6;
+					delete[]name7;
 
 					// 点击退出按钮，则将删除和升级按钮设为不可见
 					layout_return->setVisible(false);
@@ -1060,6 +1170,7 @@ void Game_one::onMouseDown(EventMouse* event)
 					layout_uplevel->setVisible(false);
 					layout_coin->setVisible(false);
 					layout_nowlevel->setVisible(false);
+					layout_range->setVisible(false);
 				}
 					break;
 				default:
@@ -1078,8 +1189,9 @@ void Game_one::onMouseDown(EventMouse* event)
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
 				case ui::Widget::TouchEventType::ENDED: {
-					char*name1 = new char[15], *name2 = new char[15], *name3 = new char[15],
-						*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+					char*name1 = new char[20], *name2 = new char[20], *name3 = new char[20],
+						*name4 = new char[20], *name5 = new char[20], *name6 = new char[20],
+						*name7 = new char[20];
 					sprintf(name1, "%d%d", int(x), int(y));
 					auto layout_tower = this->getChildByName(name1);
 
@@ -1098,12 +1210,16 @@ void Game_one::onMouseDown(EventMouse* event)
 					sprintf(name6, "%d%d_l", int(x), int(y));
 					layout_nowlevel = (Label*)(getChildByName(name6));
 
+					sprintf(name7, "%d%d_g", int(x), int(y));
+					layout_range = (Sprite*)(getChildByName(name7));
+
 					delete[]name1;
 					delete[]name2;
 					delete[]name3;
 					delete[]name4;
 					delete[]name5;
 					delete[]name6;
+					delete[]name7;
 
 					// 点击删除按钮，则将防御塔及其相关组件全部移除
 					layout_tower->removeFromParentAndCleanup(true);
@@ -1112,11 +1228,11 @@ void Game_one::onMouseDown(EventMouse* event)
 					layout_return->removeFromParentAndCleanup(true);
 					layout_coin->removeFromParentAndCleanup(true);
 					layout_nowlevel->removeFromParentAndCleanup(true);
+					layout_range->removeFromParentAndCleanup(true);
 
 					// 需要注意的是之前防御塔已经加入vector中，因此这里也要删除
-					int i = 0;
 					for (auto it = TowerExist.begin(); it != TowerExist.end();) {
-						if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY()) {
+						if (x == (*it)->getPositionX() && y == (*it)->getPositionY()) {
 							it = TowerExist.erase(it);
 							current_gold_coins += 10;
 							updateGoldCoinsDisplay();
@@ -1124,7 +1240,6 @@ void Game_one::onMouseDown(EventMouse* event)
 							break;
 						}
 						else {
-							i++;
 							it++;
 						}
 					}
@@ -1146,8 +1261,10 @@ void Game_one::onMouseDown(EventMouse* event)
 				case ui::Widget::TouchEventType::BEGAN:
 					break;
 				case ui::Widget::TouchEventType::ENDED: {
-					char*name2 = new char[15], *name3 = new char[15],
-						*name4 = new char[15], *name5 = new char[15], *name6 = new char[15];
+					char*name2 = new char[20], *name3 = new char[20],
+						*name4 = new char[20], *name5 = new char[20],
+						*name6 = new char[20], *name7 = new char[20];
+
 					sprintf(name2, "%d%d_d", int(x), int(y));
 					layout_delete = this->getChildByName(name2);
 
@@ -1163,23 +1280,27 @@ void Game_one::onMouseDown(EventMouse* event)
 					sprintf(name6, "%d%d_l", int(x), int(y));
 					layout_nowlevel = (Label*)(getChildByName(name6));
 
+					sprintf(name7, "%d%d_g", int(x), int(y));
+					layout_range = (Sprite*)(getChildByName(name7));
+
 					delete[]name2;
 					delete[]name3;
 					delete[]name4;
 					delete[]name5;
 					delete[]name6;
+					delete[]name7;
 
 					// 点击升级按钮，按坐标通过迭代器寻找所要升级的防御塔
 					auto it = TowerExist.begin();
 					int i = 0;
 					while (it != TowerExist.end())
 					{
-						if (x == TowerExist[i].getPositionX() && y == TowerExist[i].getPositionY()) {
+						if (x == TowerExist[i]->getPositionX() && y == TowerExist[i]->getPositionY()) {
 							// 如果等级小于满级
-							if (TowerExist[i].getLevel() < 4)
+							if (TowerExist[i]->getLevel() < 4)
 							{
 								// 如果钱够
-								if (TowerExist[i].upgrade(current_gold_coins)) {
+								if (TowerExist[i]->upgrade(current_gold_coins)) {
 									updateGoldCoinsDisplay();
 									showTowerGrey();
 								}
@@ -1203,6 +1324,7 @@ void Game_one::onMouseDown(EventMouse* event)
 					layout_return->setVisible(false);
 					layout_coin->setVisible(false);
 					layout_nowlevel->setVisible(false);
+					layout_range->setVisible(false);
 				}
 					break;
 				default:

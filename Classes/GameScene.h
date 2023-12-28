@@ -5,15 +5,26 @@
 #include "cocos/math/Vec2.h"
 #include "AudioEngine.h"
 #include "CEnemy.h"
+#include "CTower.h"
 #include <vector>
+
 using namespace std;
+
 USING_NS_CC;
 
 extern int current_gold_coins;
 extern Vec2 towerPosition;  // 用于存储防御塔的位置
 extern int tower0Clicked;
-extern int already;//是否选中防御塔
+extern int already; // 是否选中防御塔
 extern Vec2 mousePosition;
+
+// 子弹相关类
+struct Bullet {
+	CTower* Tower;
+	CEnemy* Enemy;
+	Sprite* bulletsprite;
+	bool flag;
+};
 
 class Game_one : public cocos2d::Scene
 {
@@ -26,6 +37,9 @@ public:
 	cocos2d::Label* mapnum;
 	vector<int> flags;
 	int current_flag;
+	vector <Bullet> allBulletArray; // 保存所有已存在的子弹对象
+	Sprite* bulletSprite;
+
 	// 防御塔可放置位置
 	const Vec2 pairxy[23] = {
 		Vec2(155,211) ,Vec2(190,211) ,Vec2(190,177) ,Vec2(190,211) ,Vec2(225,211)
@@ -52,10 +66,9 @@ public:
 	cocos2d::Node* layout_return;
 	cocos2d::Label* layout_coin;
 	cocos2d::Label* layout_nowlevel;
+	cocos2d::Sprite* layout_range;
 	// 暂停
 	void Pause(Ref* pSender);
-	// 游戏失败
-	void Default(Ref* pSender);
 	// 点击侧边防御塔并放置
 	void onMouseDown(cocos2d::EventMouse* event);
 	void onMouseDown1(cocos2d::EventMouse* event);
@@ -64,13 +77,13 @@ public:
 		int upgradeCoins, float positionY, int index);
 	// 判断是否点击到侧边防御塔
 	int checkTower0Clicked(const cocos2d::Vec2& touchLocation);
-	//建造所需要的钱
+	// 建造所需要的钱
 	int getTowerUpgradeCoins(int towerType);
-	//更新金币的数值
+	// 更新金币的数值
 	void updateGoldCoinsDisplay();
-	//金币不足的标
+	// 金币不足的标
 	cocos2d::Label* insufficientGoldLabel;
-	//显示金币不足
+	// 显示金币不足
 	void showInsufficientGoldLabel();
 	// 放置位置错误的标
 	cocos2d::Label* insufficientPlaceLabel;
@@ -92,10 +105,15 @@ public:
 	void generateflag(vector<int> flags, double x, double y);
 	bool start_generate;
 	void startgenerate(float dt);
+	void TowerAttack(float dt);
 	// 更新敌人坐标
 	void Enemyupdate(float dt);
 	// 更新萝卜血条
 	void carrotHealthUpdate(float dt);
+	// 子弹移动
+	void moveBullet(float dt);
+	// 范围伤害子弹
+	void rangeBullet(float dt);
 	// implement the "static create()" method manually
 	CREATE_FUNC(Game_one);
 };
@@ -109,6 +127,9 @@ public:
 	cocos2d::Label* mapnum;
 	vector<int> flags;
 	int current_flag;
+	vector <Bullet> allBulletArray; // 保存所有已存在的子弹对象
+	Sprite* bulletSprite;
+
 	// 防御塔可放置位置
 	const Vec2 pairxy[27] = {
 		Vec2(128,28) ,Vec2(162,28) ,Vec2(196,28),Vec2(230,28),Vec2(264,28),
@@ -136,12 +157,11 @@ public:
 	cocos2d::Node* layout_return;
 	cocos2d::Label* layout_coin;
 	cocos2d::Label* layout_nowlevel;
+	cocos2d::Sprite* layout_range;
 	// 更新金币的数值
 	void updateGoldCoinsDisplay();
 	// 暂停
 	void Pause(Ref* pSender);
-	// 游戏失败
-	void Default(Ref* pSender);
 	// 点击侧边防御塔并放置
 	void onMouseDown(cocos2d::EventMouse* event);
 	void onMouseDown1(cocos2d::EventMouse* event);
@@ -176,10 +196,13 @@ public:
 	void generateflag(vector<int> flags, double x, double y);
 	bool start_generate;
 	void startgenerate(float dt);
-	//更新敌人坐标
+	void TowerAttack(float dt);
+	// 更新敌人坐标
 	void Enemyupdate(float dt);
 	// 更新萝卜血条
 	void carrotHealthUpdate(float dt);
+	// 子弹移动
+	void moveBullet(float dt);
 	// implement the "static create()" method manually
 	CREATE_FUNC(Game_two);
 };
