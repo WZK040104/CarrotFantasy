@@ -1,7 +1,7 @@
 #include "Tower_kind.h"
 
 int tower0_upgrade_coins[MAXlevel + 1] = { 20,40,60,100,0 };				//一级升二级的钱为tower0_upgrade_coins[1]		普通炮台
-int tower0_attack[MAXlevel + 1] = { 0,5,15,25,40 }; 						//一级的伤害为tower0_attack[1]
+int tower0_attack[MAXlevel + 1] = { 0,5,15,25,35 }; 						//一级的伤害为tower0_attack[1]
 double tower0_attack_range[MAXlevel + 1] = { 0, 70, 75, 80, 85 };			//一级的攻击范围为tower0_attack_range[1]
 
 int tower1_upgrade_coins[MAXlevel + 1] = { 30,60,90,150,0 };				//一级升二级的钱为tower1_upgrade_coins[1]		伤害偏高，攻击距离较短
@@ -9,7 +9,7 @@ int tower1_attack[MAXlevel + 1] = { 0,10,20,30,45 };						//一级的伤害为tower1_a
 double tower1_attack_range[MAXlevel + 1] = { 0, 50, 55 , 60 ,65};			//一级的攻击范围为tower1_attack_range[1]
 
 int tower2_upgrade_coins[MAXlevel + 1] = { 15,35,55,80,0 };					//一级升二级的钱为tower2_upgrade_coins[1]		伤害较低，距离远但能提供减速效果（还没写）
-int tower2_attack[MAXlevel + 1] = { 0,3,9,15,25 };							//一级的伤害为tower2_attack[1]
+int tower2_attack[MAXlevel + 1] = { 0,3,8,15,25 };							//一级的伤害为tower2_attack[1]
 double tower2_attack_range[MAXlevel + 1] = { 0, 80,90,100,110 };			//一级的攻击范围为tower2_attack_range[1]
 
 int tower3_upgrade_coins[MAXlevel + 1] = { 30,60,90,150 ,0 };				//一级升二级的钱为tower3_upgrade_coins[1]		伤害较低，但是群体伤害

@@ -2,17 +2,18 @@
 #include"cocos2d.h"
 
 CEnemy::CEnemy(): enemytype(0),enemy_HP(0), HP(0), velocity(0), add_coins(0), 
-				  enemy_position_x(0), enemy_position_y(0) {}
+				  enemy_position_x(0), enemy_position_y(0),slowed(false),slowedtime(0) {}
 
+// 对象销毁时执行的清理工作，例如释放资源
 CEnemy::~CEnemy() {
 	if (enemySprite)
 	{
 		enemySprite->removeFromParent();
 	}
-};	// 对象销毁时执行的清理工作，例如释放资源
+};	
 
-void CEnemy::initial(int input_type,int input_HP, float input_velocity, int input_coins,double x,double y) 
 // 初始化怪物的生命值,速度，金币，出生点
+void CEnemy::initial(int input_type,int input_HP, float input_velocity, int input_coins,double x,double y) 
 {
 	enemytype = input_type;
 	enemy_HP = input_HP;	 // 初始化怪物的生命值
@@ -105,10 +106,6 @@ cocos2d::Sprite* CEnemy::getSprite()
 	return enemySprite;
 }
 
-void CEnemy::setHP()
-{
-	HP = 5;
-}
 int CEnemy::getadd_coins()
 {
 	return add_coins;

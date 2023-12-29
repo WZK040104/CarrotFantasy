@@ -70,14 +70,14 @@ bool CTower::inRange(CEnemy* enemy)
 {
 	if ((enemy->EnemyPositionX() - getPositionX()) * (enemy->EnemyPositionX() - getPositionX()) +
 		(enemy->EnemyPositionY() - getPositionY()) * (enemy->EnemyPositionY() - getPositionY())
-		<= getAttackRange() * getAttackRange())
+		<= getAttackRange() * getAttackRange() && enemy->EnemyPositionX() <= 420)
 		return true;
 	else
 		return false;
 }
 
 // Ñ°ÕÒ¾àÀëÂÜ²·×î½üµÄµÐÈË
-CEnemy* nearestEnemy(vector<CEnemy*>& enemy, int positionx,int positiony)
+CEnemy* CTower::nearestEnemy(vector<CEnemy*>& enemy, int positionx,int positiony)
 {
 	if (enemy.empty()) 
 	{

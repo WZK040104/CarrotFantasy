@@ -79,6 +79,8 @@ public:
 	int checkTower0Clicked(const cocos2d::Vec2& touchLocation);
 	// 建造所需要的钱
 	int getTowerUpgradeCoins(int towerType);
+	// 每秒金币加2
+	void addcoins2(float dt);
 	// 更新金币的数值
 	void updateGoldCoinsDisplay();
 	// 金币不足的标
@@ -174,6 +176,8 @@ public:
 	int getTowerUpgradeCoins(int towerType);
 	// 金币不足的标
 	cocos2d::Label* insufficientGoldLabel;
+	// 每秒加两金币
+	void addcoins2(float dt);
 	// 显示金币不足
 	void showInsufficientGoldLabel();
 	// 等级已满的标

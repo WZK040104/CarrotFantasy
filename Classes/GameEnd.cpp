@@ -24,7 +24,7 @@ Scene* GameEnd::scene(RenderTexture* sqr)
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto back_sqr = Sprite::createWithTexture(sqr->getSprite()->getTexture());
 	back_sqr->setPosition(Vec2(visibleSize.width / 2 + 24, visibleSize.height / 2)); // 放置位置,这个相对于中心位置。
-	back_sqr->setFlipY(true);            // 翻转，因为UI坐标和OpenGL坐标不同
+	back_sqr->setFlippedY(true);             // 翻转，因为UI坐标和OpenGL坐标不同
 	back_sqr->setColor(Color3B(80, 80, 80)); // 图片颜色变灰色
 	scene->addChild(back_sqr);
 	return scene;
@@ -73,7 +73,7 @@ bool GameEnd::init()
 void GameEnd::ContinueGame(Ref *pSender)
 {
 	TowerExist.clear();
-	countnum = 20;
+	countnum = 5;
 	carrot_level = 1;
 	carrot_HP = 5;
 
@@ -102,7 +102,7 @@ void GameEnd::ContinueGame(Ref *pSender)
 void GameEnd::ReturnMenuGame(Ref *pSender)
 {
 	TowerExist.clear();
-	countnum = 20;
+	countnum = 5;
 	carrot_level = 1;
 	carrot_HP = 5;
 

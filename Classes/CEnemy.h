@@ -28,15 +28,15 @@ public:
 	void set_x(double input_x);
 	void set_y(double input_y);
 	void HP_calculate(int damage_per_time);
-	void setHP();
 	float get_velocity();
 	float getHPpercentage();
 	int enemytype;
+	bool slowed;
+	float slowedtime;
+
 	cocos2d::Sprite* enemySprite; // 怪物的精灵
 	cocos2d::Sprite* getSprite();
-	cocos2d::ProgressTimer* enemyHealthbar;// 怪物血条
+	cocos2d::ProgressTimer* enemyHealthbar; // 怪物血条
 	cocos2d::Sprite* enemyHealthbar_back;
-	//cocos2d::Sprite* getHealthbar();
-	//cocos2d::Sprite* getHealthbar_back();
 };
 #endif

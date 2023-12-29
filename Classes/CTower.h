@@ -73,5 +73,6 @@ public:
 	int getUpgradeCost();			// 获取升级需要的钱
 	double getPositionX();		    // 获取x坐标
 	double getPositionY();		    // 获取y坐标
+	CEnemy* nearestEnemy(vector<CEnemy*>& enemy, int positionx, int positiony);
 };
 #endif

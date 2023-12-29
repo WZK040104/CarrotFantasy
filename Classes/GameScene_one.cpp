@@ -5,7 +5,6 @@
 #include "PlaceTower.h"
 #include "GameEnd.h"
 #include "GameDefault.h"
-#include "GBKtoUTF-8.h"
 #include "Tower_kind.h"
 #include "CEnemy.h"
 #include "GenerateEnemy.h"
@@ -17,8 +16,8 @@ USING_NS_CC;
 using namespace std;
 using namespace cocos2d::ui;
 
-int current_gold_coins = 1000; // 当前金币数
-int countnum = 20; // 倒计时时间
+int current_gold_coins = 200; // 当前金币数
+int countnum = 5; // 倒计时时间
 
 // 萝卜相关属性
 int coins[4] = { 0,20,40,60 };	//1级升2级需要的金币为 coins[1] 
@@ -42,25 +41,6 @@ static void problemLoading(const char* filename)
 {
 	printf("Error while loading: %s\n", filename);
 	printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
-}
-
-// GBK转UTF-8编码
-std::string GBKToUTF8(const std::string& strGBK)
-{
-	std::string strOutUTF8 = "";
-	WCHAR* str1;
-	int n = MultiByteToWideChar(CP_ACP, 0, strGBK.c_str(), -1, NULL, 0);
-	str1 = new WCHAR[n];
-	MultiByteToWideChar(CP_ACP, 0, strGBK.c_str(), -1, str1, n);
-	n = WideCharToMultiByte(CP_UTF8, 0, str1, -1, NULL, 0, NULL, NULL);
-	char* str2 = new char[n];
-	WideCharToMultiByte(CP_UTF8, 0, str1, -1, str2, n, NULL, NULL);
-	strOutUTF8 = str2;
-	delete[]str1;
-	str1 = NULL;
-	delete[]str2;
-	str2 = NULL;
-	return strOutUTF8;
 }
 
 // 添加侧边防御塔的图标
@@ -89,7 +69,7 @@ bool Game_one::init()
 {
 	// 所有的初始化在这里：清空现有防御塔，重置金币，重置一切
 	TowerExist.clear();
-	current_gold_coins = 1000;
+	current_gold_coins = 200;
 	start_generate = false;
 	current_flag = 1;
 	carrot_HP = 5;
@@ -150,145 +130,148 @@ bool Game_one::init()
 	auto menu = Menu::createWithArray(MenuItems);
 	this->addChild(menu, 1);
 
-	// 添加 "carrot" 图片
-	auto carrot_pic = Button::create("carrot.png", "carrot.png");
-	carrot_pic->setPosition(Vec2(86, 248));
-	this->addChild(carrot_pic, 1);
+	//萝卜相关
+	{
+		// 添加 "carrot" 图片
+		auto carrot_pic = Button::create("carrot.png", "carrot.png");
+		carrot_pic->setPosition(Vec2(86, 248));
+		this->addChild(carrot_pic, 1);
 
-	// 升级按钮
-	auto levelupcarrotbutton = Button::create("levelup.png");
-	levelupcarrotbutton->setPosition(Vec2(96, 224));
-	this->addChild(levelupcarrotbutton, 2, "carrot_u");
-	levelupcarrotbutton->setVisible(false);
+		// 升级按钮
+		auto levelupcarrotbutton = Button::create("levelup.png");
+		levelupcarrotbutton->setPosition(Vec2(96, 224));
+		this->addChild(levelupcarrotbutton, 2, "carrot_u");
+		levelupcarrotbutton->setVisible(false);
 
-	// 退出按钮
-	auto returncarrotbutton = Button::create("exit.png");
-	returncarrotbutton->setPosition(Vec2(80, 225));
-	this->addChild(returncarrotbutton, 2, "carrot_r");
-	returncarrotbutton->setVisible(false);
+		// 退出按钮
+		auto returncarrotbutton = Button::create("exit.png");
+		returncarrotbutton->setPosition(Vec2(80, 225));
+		this->addChild(returncarrotbutton, 2, "carrot_r");
+		returncarrotbutton->setVisible(false);
 
-	// 升级金币标签
-	auto levelupcarrotcoin = Label::createWithTTF("20", "fonts/Marker Felt.ttf", 10);
-	levelupcarrotcoin->setColor(Color3B(255, 255, 0));
-	levelupcarrotcoin->setVisible(false);
-	levelupcarrotcoin->setPosition(Vec2(106, 224));
-	this->addChild(levelupcarrotcoin, 2, "carrot_c");
+		// 升级金币标签
+		auto levelupcarrotcoin = Label::createWithTTF("20", "fonts/Marker Felt.ttf", 10);
+		levelupcarrotcoin->setColor(Color3B(255, 255, 0));
+		levelupcarrotcoin->setVisible(false);
+		levelupcarrotcoin->setPosition(Vec2(106, 224));
+		this->addChild(levelupcarrotcoin, 2, "carrot_c");
 
-	// 等级标签
-	auto carrotlevel = Label::createWithTTF("Lv.1", "fonts/Marker Felt.ttf", 10);
-	carrotlevel->setColor(Color3B(255, 0, 0));
-	carrotlevel->setVisible(false);
-	carrotlevel->setPosition(Vec2(86, 268));
-	this->addChild(carrotlevel, 2, "carrot_l");
+		// 等级标签
+		auto carrotlevel = Label::createWithTTF("Lv.1", "fonts/Marker Felt.ttf", 10);
+		carrotlevel->setColor(Color3B(255, 0, 0));
+		carrotlevel->setVisible(false);
+		carrotlevel->setPosition(Vec2(86, 268));
+		this->addChild(carrotlevel, 2, "carrot_l");
 
-	// 点击萝卜图片
-	carrot_pic->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
-		switch (type)
-		{
-		case ui::Widget::TouchEventType::BEGAN:
-			break;
-		case ui::Widget::TouchEventType::ENDED: {
-			layout_uplevel = this->getChildByName("carrot_u");
-			layout_return = this->getChildByName("carrot_r");
-			layout_coin = (Label*)(getChildByName("carrot_c"));
-			layout_nowlevel = (Label*)(getChildByName("carrot_l"));
-
-			int money = coins[carrot_level];
-			layout_coin->setString(std::to_string(money));
-			std::string levelname = "Lv." + std::to_string(carrot_level);
-			layout_nowlevel->setString(levelname);
-
-			layout_uplevel->setVisible(true);
-			layout_return->setVisible(true);
-			layout_coin->setVisible(true);
-			layout_nowlevel->setVisible(true);
-		}
-			break;
-		default:
-			break;
-		}
-	});
-
-	// 点击萝卜的返回按钮
-	returncarrotbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
-		switch (type)
-		{
-		case ui::Widget::TouchEventType::BEGAN:
-			break;
-		case ui::Widget::TouchEventType::ENDED: {
-			layout_uplevel = this->getChildByName("carrot_u");
-			layout_return = this->getChildByName("carrot_r");
-			layout_coin = (Label*)(getChildByName("carrot_c"));
-			layout_nowlevel = (Label*)(getChildByName("carrot_l"));
-
-			layout_uplevel->setVisible(false);
-			layout_return->setVisible(false);
-			layout_coin->setVisible(false);
-			layout_nowlevel->setVisible(false);
-		}
-			break;
-		default:
-			break;
-		}
-	});
-
-	// 萝卜升级
-	levelupcarrotbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
-		switch (type)
-		{
-		case ui::Widget::TouchEventType::BEGAN:
-			break;
-		case ui::Widget::TouchEventType::ENDED: {
-			layout_uplevel = this->getChildByName("carrot_u");
-			layout_return = this->getChildByName("carrot_r");
-			layout_coin = (Label*)(getChildByName("carrot_c"));
-			layout_nowlevel = (Label*)(getChildByName("carrot_l"));
-
-			if (carrot_level <= 3)
+		// 点击萝卜图片
+		carrot_pic->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+			switch (type)
 			{
-				if (current_gold_coins >= coins[carrot_level]) {
-					current_gold_coins -= coins[carrot_level];
-					carrot_level++;
-					carrot_HP += 5;
-					if (carrot_HP > carrot_health[carrot_level])
-						carrot_HP = carrot_health[carrot_level];
-					updateGoldCoinsDisplay();
-					showTowerGrey();
+			case ui::Widget::TouchEventType::BEGAN:
+				break;
+			case ui::Widget::TouchEventType::ENDED: {
+				layout_uplevel = this->getChildByName("carrot_u");
+				layout_return = this->getChildByName("carrot_r");
+				layout_coin = (Label*)(getChildByName("carrot_c"));
+				layout_nowlevel = (Label*)(getChildByName("carrot_l"));
+
+				int money = coins[carrot_level];
+				layout_coin->setString(std::to_string(money));
+				std::string levelname = "Lv." + std::to_string(carrot_level);
+				layout_nowlevel->setString(levelname);
+
+				layout_uplevel->setVisible(true);
+				layout_return->setVisible(true);
+				layout_coin->setVisible(true);
+				layout_nowlevel->setVisible(true);
+			}
+				break;
+			default:
+				break;
+			}
+		});
+
+		// 点击萝卜的返回按钮
+		returncarrotbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+			switch (type)
+			{
+			case ui::Widget::TouchEventType::BEGAN:
+				break;
+			case ui::Widget::TouchEventType::ENDED: {
+				layout_uplevel = this->getChildByName("carrot_u");
+				layout_return = this->getChildByName("carrot_r");
+				layout_coin = (Label*)(getChildByName("carrot_c"));
+				layout_nowlevel = (Label*)(getChildByName("carrot_l"));
+
+				layout_uplevel->setVisible(false);
+				layout_return->setVisible(false);
+				layout_coin->setVisible(false);
+				layout_nowlevel->setVisible(false);
+			}
+				break;
+			default:
+				break;
+			}
+		});
+
+		// 萝卜升级
+		levelupcarrotbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+			switch (type)
+			{
+			case ui::Widget::TouchEventType::BEGAN:
+				break;
+			case ui::Widget::TouchEventType::ENDED: {
+				layout_uplevel = this->getChildByName("carrot_u");
+				layout_return = this->getChildByName("carrot_r");
+				layout_coin = (Label*)(getChildByName("carrot_c"));
+				layout_nowlevel = (Label*)(getChildByName("carrot_l"));
+
+				if (carrot_level <= 3)
+				{
+					if (current_gold_coins >= coins[carrot_level]) {
+						current_gold_coins -= coins[carrot_level];
+						carrot_level++;
+						carrot_HP += 5;
+						if (carrot_HP > carrot_health[carrot_level])
+							carrot_HP = carrot_health[carrot_level];
+						updateGoldCoinsDisplay();
+						showTowerGrey();
+					}
+					else
+						showInsufficientGoldLabel();
 				}
 				else
-					showInsufficientGoldLabel();
-			}
-			else
-			{
-				showInsufficientLevelLabel();
+				{
+					showInsufficientLevelLabel();
+					layout_uplevel->setVisible(false);
+				}
+
 				layout_uplevel->setVisible(false);
+				layout_return->setVisible(false);
+				layout_coin->setVisible(false);
+				layout_nowlevel->setVisible(false);
 			}
+				break;
+			default:
+				break;
+			}
+		});
 
-			layout_uplevel->setVisible(false);
-			layout_return->setVisible(false);
-			layout_coin->setVisible(false);
-			layout_nowlevel->setVisible(false);
-		}
-			break;
-		default:
-			break;
-		}
-	});
+		// 萝卜血条背景
+		auto CarrotHealthBack = Sprite::create("CarrotHealthBack.png");
+		CarrotHealthBack->setPosition(Vec2(86, 278));// 萝卜上方位置
+		this->addChild(CarrotHealthBack, 1);
 
-	// 萝卜血条背景
-	auto CarrotHealthBack = Sprite::create("CarrotHealthBack.png");
-	CarrotHealthBack->setPosition(Vec2(86, 278));// 萝卜上方位置
-	this->addChild(CarrotHealthBack, 1);
-	
-	// 添加萝卜血条
-	ProgressTimer* healthBar = ProgressTimer::create(Sprite::create("HealthBar.png"));
-	healthBar->setType(ProgressTimer::Type::BAR);
-	healthBar->setMidpoint(Vec2(0, 0.5));
-	healthBar->setBarChangeRate(Vec2(1, 0));
-	healthBar->setPosition(Vec2(86, 278));  // 萝卜上方位置
-	healthBar->setPercentage(100.0f);
-	this->addChild(healthBar, 2,"healthBar");
-	this->schedule(CC_SCHEDULE_SELECTOR(Game_one::carrotHealthUpdate), 1.0f / 60.0f);
+		// 添加萝卜血条
+		ProgressTimer* healthBar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+		healthBar->setType(ProgressTimer::Type::BAR);
+		healthBar->setMidpoint(Vec2(0, 0.5));
+		healthBar->setBarChangeRate(Vec2(1, 0));
+		healthBar->setPosition(Vec2(86, 278));  // 萝卜上方位置
+		healthBar->setPercentage(100.0f);
+		this->addChild(healthBar, 2, "healthBar");
+		this->schedule(CC_SCHEDULE_SELECTOR(Game_one::carrotHealthUpdate), 1.0f / 60.0f);
+	}
 
 	// 添加出怪牌图片
 	auto GuideBoard = Sprite::create("GuideBoard.png");
@@ -303,7 +286,7 @@ bool Game_one::init()
 	}
 
 	// 添加文字
-	auto countdown = Label::createWithTTF("Monsters strike 20 seconds later", "fonts/Marker Felt.ttf", 14);
+	auto countdown = Label::createWithTTF("Monsters strike 5 seconds later", "fonts/Marker Felt.ttf", 14);
 	if (countdown == nullptr)
 	{
 		problemLoading("'fonts/Marker Felt.ttf'");
@@ -459,80 +442,83 @@ bool Game_one::init()
 
 	EnemyExist.clear();
 
-	flags = { 1,1,-1, 2,2,-1 , 3,3,-1 ,4,4, };
+	flags = { 1,1,1,1,1,1,-1, 1,1,1,2,2,2,-1,2,2,2,2,2,2,-1 ,1,1,1,3,3,3,-1 ,3,3,3,3,3,3,-1,3,3,3,4,4,4,-1,4,4,4,4,4,4,-1,0 };
 
 	generateflag(flags, 420, 75);
 
 	double x_ = 420, y_ = 75;
-	for (auto it_enmey = EnemyExist.begin(); it_enmey != EnemyExist.end(); ++it_enmey)
+	for (auto it_enemy = EnemyExist.begin(); it_enemy != EnemyExist.end(); ++it_enemy)
 	{
-		switch ((*it_enmey)->enemytype)
+		switch ((*it_enemy)->enemytype)
 		{
 		case -1:
-			(*it_enmey)->enemySprite = nullptr;
+			(*it_enemy)->enemySprite = nullptr;
 			x_ += 300;
 			current_flag++;
 			continue;
 		case 0:
-			//(*it_enmey)->enemySprite = Sprite::create("Enemy_zero.png");
+			(*it_enemy)->enemySprite = Sprite::create("Enemy_zero.png");
+			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
+			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
 			break;
 		case 1:
-			(*it_enmey)->enemySprite = Sprite::create("Enemy_one.png");
-			(*it_enmey)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
-			(*it_enmey)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->enemySprite = Sprite::create("Enemy_one.png");
+			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
+			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
 			break;
 		case 2:
-			(*it_enmey)->enemySprite = Sprite::create("Enemy_two.png");
-			(*it_enmey)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
-			(*it_enmey)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->enemySprite = Sprite::create("Enemy_two.png");
+			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
+			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
 			break;
 		case 3:
-			(*it_enmey)->enemySprite = Sprite::create("Enemy_three.png");
-			(*it_enmey)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
-			(*it_enmey)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->enemySprite = Sprite::create("Enemy_three.png");
+			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
+			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
 			break;
 		case 4:
-			(*it_enmey)->enemySprite = Sprite::create("Enemy_four.png");
-			(*it_enmey)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
-			(*it_enmey)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->enemySprite = Sprite::create("Enemy_four.png");
+			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
+			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
 			break;
 		default:
 			break;
 		}
 
-		(*it_enmey)->set_x(x_);
-		(*it_enmey)->set_y(y_);
-		(*it_enmey)->enemySprite->setPosition(Vec2(x_, y_));
-		(*it_enmey)->enemyHealthbar_back->setPosition(Vec2(x_, y_ + 20));
-		(*it_enmey)->enemyHealthbar->setPosition(Vec2(x_, y_ + 20));
-		(*it_enmey)->enemyHealthbar->setType(ProgressTimer::Type::BAR);
-		(*it_enmey)->enemyHealthbar->setMidpoint(Vec2(0, 0.5)); // 设置起始位置为水平左边中点
-		(*it_enmey)->enemyHealthbar->setBarChangeRate(Vec2(1, 0)); // 设置减少方向为水平向左
-		(*it_enmey)->enemyHealthbar->setPercentage(100.0f);
+		(*it_enemy)->set_x(x_);
+		(*it_enemy)->set_y(y_);
+		(*it_enemy)->enemySprite->setPosition(Vec2(x_, y_));
+		(*it_enemy)->enemyHealthbar_back->setPosition(Vec2(x_, y_ + 20));
+		(*it_enemy)->enemyHealthbar->setPosition(Vec2(x_, y_ + 20));
+		(*it_enemy)->enemyHealthbar->setType(ProgressTimer::Type::BAR);
+		(*it_enemy)->enemyHealthbar->setMidpoint(Vec2(0, 0.5)); // 设置起始位置为水平左边中点
+		(*it_enemy)->enemyHealthbar->setBarChangeRate(Vec2(1, 0)); // 设置减少方向为水平向左
+		(*it_enemy)->enemyHealthbar->setPercentage(100.0f);
 
 		if (x_ >= 420)
 		{
-			(*it_enmey)->enemySprite->setVisible(false);
-			(*it_enmey)->enemyHealthbar_back->setVisible(false);
-			(*it_enmey)->enemyHealthbar->setVisible(false);
+			(*it_enemy)->enemySprite->setVisible(false);
+			(*it_enemy)->enemyHealthbar_back->setVisible(false);
+			(*it_enemy)->enemyHealthbar->setVisible(false);
 		}
 		else
 		{
-			(*it_enmey)->enemySprite->setVisible(true);
-			(*it_enmey)->enemyHealthbar_back->setVisible(true);
-			(*it_enmey)->enemyHealthbar->setVisible(true);
+			(*it_enemy)->enemySprite->setVisible(true);
+			(*it_enemy)->enemyHealthbar_back->setVisible(true);
+			(*it_enemy)->enemyHealthbar->setVisible(true);
 		}
-		x_ += 50;
+		x_ += 45;
 
-		this->addChild((*it_enmey)->enemySprite, 1);
-		this->addChild((*it_enmey)->enemyHealthbar_back, 1);
-		this->addChild((*it_enmey)->enemyHealthbar, 2,"HealthBar.png");
+		this->addChild((*it_enemy)->enemySprite, 1);
+		this->addChild((*it_enemy)->enemyHealthbar_back, 1);
+		this->addChild((*it_enemy)->enemyHealthbar, 2,"HealthBar.png");
 	}
 
 	// 每帧调用 update 函数
 	this->scheduleOnce(CC_SCHEDULE_SELECTOR(Game_one::startgenerate), 5.0f);
 	this->schedule(CC_SCHEDULE_SELECTOR(Game_one::Enemyupdate), 1.0f / 60.0f);
 	this->schedule(CC_SCHEDULE_SELECTOR(Game_one::TowerAttack), 1.0f);
+	this->schedule(CC_SCHEDULE_SELECTOR(Game_one::addcoins2), 1.0f);
 	return true;
 }
 
@@ -543,12 +529,26 @@ void Game_one::Enemyupdate(float dt)// 访问全体存在的怪物并且更改其坐标
 	{
 		double speed = 0.5;
 		float new_x, new_y;
-		for (auto it_enmey = EnemyExist.begin(); it_enmey != EnemyExist.end();)
+		for (auto it_enemy = EnemyExist.begin(); it_enemy != EnemyExist.end();)
 		{
-			if ((*it_enmey)->alive())
+			if ((*it_enemy)->alive())
 			{
-				speed = (*it_enmey)->get_velocity();
-				new_x = (*it_enmey)->EnemyPositionX(), new_y = (*it_enmey)->EnemyPositionY();
+				if ((*it_enemy)->slowed && (*it_enemy)->slowedtime <= 3)
+				{
+					speed = (*it_enemy)->get_velocity()*0.5;
+					(*it_enemy)->slowedtime += dt;
+				}
+				else if ((*it_enemy)->slowed && (*it_enemy)->slowedtime > 3)
+				{
+					(*it_enemy)->slowed = false;
+					(*it_enemy)->slowedtime = 0;
+				}
+				else
+				{
+					speed = (*it_enemy)->get_velocity();
+				}
+
+				new_x = (*it_enemy)->EnemyPositionX(), new_y = (*it_enemy)->EnemyPositionY();
 
 				if (new_x >= 420)
 					new_x -= 0.5;
@@ -559,7 +559,7 @@ void Game_one::Enemyupdate(float dt)// 访问全体存在的怪物并且更改其坐标
 				else if (new_y <= 246 && new_x < 261 && new_x > 102)
 					new_x -= speed;
 				else if (new_x <= 102) {
-					(*it_enmey)->HP_calculate(10000);
+					(*it_enemy)->HP_calculate(10000);
 					carrot_HP -=1;
 					// 游戏结束
 					if (carrot_HP <= 0) {
@@ -577,39 +577,39 @@ void Game_one::Enemyupdate(float dt)// 访问全体存在的怪物并且更改其坐标
 					}
 				}
 					
-				(*it_enmey)->enemySprite->setPosition(Vec2(new_x, new_y));
-				(*it_enmey)->enemyHealthbar_back->setPosition(Vec2(new_x, new_y + 20));
-				(*it_enmey)->enemyHealthbar->setPosition(Vec2(new_x, new_y + 20));
-				(*it_enmey)->enemyHealthbar->setPercentage((*it_enmey)->getHPpercentage()*100);
+				(*it_enemy)->enemySprite->setPosition(Vec2(new_x, new_y));
+				(*it_enemy)->enemyHealthbar_back->setPosition(Vec2(new_x, new_y + 20));
+				(*it_enemy)->enemyHealthbar->setPosition(Vec2(new_x, new_y + 20));
+				(*it_enemy)->enemyHealthbar->setPercentage((*it_enemy)->getHPpercentage()*100);
 
-				(*it_enmey)->set_x(new_x);
-				(*it_enmey)->set_y(new_y);
+				(*it_enemy)->set_x(new_x);
+				(*it_enemy)->set_y(new_y);
 				if (new_x >= 420)
 				{
-					(*it_enmey)->enemySprite->setVisible(false);
-					(*it_enmey)->enemyHealthbar_back->setVisible(false);
-					(*it_enmey)->enemyHealthbar->setVisible(false);
+					(*it_enemy)->enemySprite->setVisible(false);
+					(*it_enemy)->enemyHealthbar_back->setVisible(false);
+					(*it_enemy)->enemyHealthbar->setVisible(false);
 				}
 				else
 				{
-					(*it_enmey)->enemySprite->setVisible(true);
-					(*it_enmey)->enemyHealthbar_back->setVisible(true);
-					(*it_enmey)->enemyHealthbar->setVisible(true);
+					(*it_enemy)->enemySprite->setVisible(true);
+					(*it_enemy)->enemyHealthbar_back->setVisible(true);
+					(*it_enemy)->enemyHealthbar->setVisible(true);
 				}
 			}
 			else
 			{
 				// 移除怪物精灵和删除怪物对象
-				if ((*it_enmey)->enemySprite)
+				if ((*it_enemy)->enemySprite)
 				{
-					current_gold_coins += (*it_enmey)->getadd_coins();
+					current_gold_coins += (*it_enemy)->getadd_coins();
 					updateGoldCoinsDisplay();
 					showTowerGrey();
-					(*it_enmey)->enemySprite->removeFromParent();
-					(*it_enmey)->enemyHealthbar->removeFromParent();
-					(*it_enmey)->enemyHealthbar_back->removeFromParent();
+					(*it_enemy)->enemySprite->removeFromParent();
+					(*it_enemy)->enemyHealthbar->removeFromParent();
+					(*it_enemy)->enemyHealthbar_back->removeFromParent();
 				}
-				it_enmey = EnemyExist.erase(it_enmey);
+				it_enemy = EnemyExist.erase(it_enemy);
 				// 游戏结束的标志
 				if (EnemyExist.empty()&& carrot_HP>0)
 				{
@@ -629,7 +629,7 @@ void Game_one::Enemyupdate(float dt)// 访问全体存在的怪物并且更改其坐标
 				}
 				continue;  // 继续下一次循环，不需要执行 delete 操作
 			}
-			++it_enmey;
+			++it_enemy;
 		}
 	}
 }
@@ -651,6 +651,7 @@ void Game_one::generateOneEnemy(vector<CEnemy*>& EnemyExist, int enemyType, doub
 	switch (enemyType) {
 	case 0:
 		newEnemy = new Enemy0();
+		newEnemy->initial(0, 1500, 0.3f, 100, 0, 0);
 		break;
 	case 1:
 		newEnemy = new Enemy1();
@@ -658,15 +659,15 @@ void Game_one::generateOneEnemy(vector<CEnemy*>& EnemyExist, int enemyType, doub
 		break;
 	case 2:
 		newEnemy = new Enemy2();
-		newEnemy->initial(2, 30, 0.5, 10, 0, 0);
+		newEnemy->initial(2, 50, 0.5, 10, 0, 0);
 		break;
 	case 3:
 		newEnemy = new Enemy3();
-		newEnemy->initial(3, 30, 1, 15, 0, 0);
+		newEnemy->initial(3, 100, 1, 15, 0, 0);
 		break;
 	case 4:
 		newEnemy = new Enemy4();
-		newEnemy->initial(4, 100, 0.75, 30, 0, 0);
+		newEnemy->initial(4, 200, 0.75, 30, 0, 0);
 		break;
 
 	default:
@@ -703,7 +704,7 @@ void Game_one::TowerAttack(float dt)
 		for (auto enemy_it = EnemyExist.begin(); enemy_it != EnemyExist.end(); ++enemy_it)
 		{
 			enemy = *enemy_it;
-			if (tower->inRange(enemy)&& enemy->EnemyPositionX()<=420)
+			if (tower->inRange(enemy)&& enemy->EnemyPositionX()<=419)
 			{
 				inRangeEnemies.push_back(enemy);
 			}
@@ -766,6 +767,11 @@ void Game_one::moveBullet(float dt) {
 				bulletSprite->removeChild((*it).bulletsprite, true);
 				if (!(*it).flag) {
 					(*it).Enemy->HP_calculate((*it).Tower->getDamage());
+					if ((*it).Tower->getType() == 2)
+					{
+						(*it).Enemy->slowed = true;
+						(*it).Enemy->slowedtime = 0.0;
+					}
 					(*it).flag = true;
 				}	
 			}
@@ -777,9 +783,18 @@ void Game_one::moveBullet(float dt) {
 	}
 }
 
+//开始生成怪物
 void Game_one::startgenerate(float dt)
 {
 	start_generate = true;
+}
+
+//金币数量每秒加2
+void Game_one::addcoins2(float dt)
+{
+	current_gold_coins += 2;
+	updateGoldCoinsDisplay();
+	showTowerGrey();
 }
 
 // 更新金币的数量
@@ -932,7 +947,6 @@ bool deal_with_xy1(double &x ,double& y)
 		if (x == TowerExist[i]->getPositionX() && y == TowerExist[i]->getPositionY())
 			return 0;
 	}
-
 	return 1;
 }
 
@@ -1139,6 +1153,7 @@ void Game_one::onMouseDown(EventMouse* event)
 					char*name2 = new char[20], *name3 = new char[20],
 						*name4 = new char[20], *name5 = new char[20],
 						*name6 = new char[20], *name7 = new char[20];
+
 					sprintf(name2, "%d%d_d", int(x), int(y));
 					layout_delete = this->getChildByName(name2);
 
@@ -1192,6 +1207,7 @@ void Game_one::onMouseDown(EventMouse* event)
 					char*name1 = new char[20], *name2 = new char[20], *name3 = new char[20],
 						*name4 = new char[20], *name5 = new char[20], *name6 = new char[20],
 						*name7 = new char[20];
+
 					sprintf(name1, "%d%d", int(x), int(y));
 					auto layout_tower = this->getChildByName(name1);
 
@@ -1374,7 +1390,6 @@ void Game_one::onMouseDown1(EventMouse* event)
 			}
 		}
 		return;
-		
 	}
 }
 
@@ -1445,23 +1460,48 @@ void Game_one::step(float Dt)
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
-	else if (countnum <= 0 && countnum>-13) {
-		sprintf(StringOfNum, "The first wave");
+	else if (countnum <= 0 && countnum>-18) {
+		sprintf(StringOfNum, "Wave 1 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
-	else if (countnum <= -13 && countnum > -26) {
-		sprintf(StringOfNum, "The second wave");
+	else if (countnum <= -18 && countnum > -36) {
+		sprintf(StringOfNum, "Wave 2 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
-	else if (countnum <= -26 && countnum > -39) {
-		sprintf(StringOfNum, "The third wave");
+	else if (countnum <= -36 && countnum > -56) {
+		sprintf(StringOfNum, "Wave 3 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
-	else {
-		sprintf(StringOfNum, "The final wave");
+	else if (countnum <= -56 && countnum > -75) {
+		sprintf(StringOfNum, "Wave 4 / 8");
+		auto countdown = (Label*)(getChildByTag(1000));
+		countdown->setString(StringOfNum);
+	}
+	else if (countnum <= -75 && countnum > -94) {
+		sprintf(StringOfNum, "Wave 5 / 8");
+		auto countdown = (Label*)(getChildByTag(1000));
+		countdown->setString(StringOfNum);
+	}
+	else if (countnum <= -94 && countnum > -113) {
+		sprintf(StringOfNum, "Wave 6 / 8");
+		auto countdown = (Label*)(getChildByTag(1000));
+		countdown->setString(StringOfNum);
+	}
+	else if (countnum <= -113 && countnum > -133) {
+		sprintf(StringOfNum, "Wave 7 / 8");
+		auto countdown = (Label*)(getChildByTag(1000));
+		countdown->setString(StringOfNum);
+	}
+	else if (countnum <= -133 && countnum > -135) {
+		sprintf(StringOfNum, "Wave 8 / 8");
+		auto countdown = (Label*)(getChildByTag(1000));
+		countdown->setString(StringOfNum);
+	}
+	else{
+		sprintf(StringOfNum, "Boss coming!");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}

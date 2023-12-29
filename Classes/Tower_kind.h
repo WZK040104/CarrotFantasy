@@ -40,8 +40,8 @@ public:
 class Tower2 : public CTower
 {
 public:
-    Tower2();
-    virtual ~Tower2();
+	Tower2();
+	virtual ~Tower2();
 };
 
 class Tower3 : public CTower
