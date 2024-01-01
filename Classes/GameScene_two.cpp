@@ -282,7 +282,7 @@ bool Game_two::init()
 	}
 
 	// 添加文字
-	auto countdown = Label::createWithTTF("Monsters strike 20 seconds later", "fonts/Marker Felt.ttf", 14);
+	auto countdown = Label::createWithTTF("Monsters strike 5 seconds later", "fonts/Marker Felt.ttf", 14);
 	if (countdown == nullptr)
 	{
 		problemLoading("'fonts/Marker Felt.ttf'");
@@ -452,29 +452,39 @@ bool Game_two::init()
 			current_flag++;
 			continue;
 		case 0:
-			(*it_enemy)->enemySprite = Sprite::create("Enemy_zero2.png");
+			(*it_enemy)->enemySprite = Sprite::create("Enemy_zero.png");
 			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
 			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->dizzypic = cocos2d::Sprite::create("vertigo.png");
+			(*it_enemy)->dizzypic->setVisible(false);
 			break;
 		case 1:
 			(*it_enemy)->enemySprite = Sprite::create("Enemy_one.png");
 			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
 			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->dizzypic = cocos2d::Sprite::create("vertigo.png");
+			(*it_enemy)->dizzypic->setVisible(false);
 			break;
 		case 2:
 			(*it_enemy)->enemySprite = Sprite::create("Enemy_two.png");
 			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
 			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->dizzypic = cocos2d::Sprite::create("vertigo.png");
+			(*it_enemy)->dizzypic->setVisible(false);
 			break;
 		case 3:
 			(*it_enemy)->enemySprite = Sprite::create("Enemy_three.png");
 			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
 			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->dizzypic = cocos2d::Sprite::create("vertigo.png");
+			(*it_enemy)->dizzypic->setVisible(false);
 			break;
 		case 4:
 			(*it_enemy)->enemySprite = Sprite::create("Enemy_four.png");
 			(*it_enemy)->enemyHealthbar_back = Sprite::create("CarrotHealthBack.png");
 			(*it_enemy)->enemyHealthbar = ProgressTimer::create(Sprite::create("HealthBar.png"));
+			(*it_enemy)->dizzypic = cocos2d::Sprite::create("vertigo.png");
+			(*it_enemy)->dizzypic->setVisible(false);
 			break;
 		default:
 			break;
@@ -489,12 +499,14 @@ bool Game_two::init()
 		(*it_enemy)->enemyHealthbar->setMidpoint(Vec2(0, 0.5)); // 设置起始位置为水平左边中点
 		(*it_enemy)->enemyHealthbar->setBarChangeRate(Vec2(1, 0)); // 设置减少方向为水平向左
 		(*it_enemy)->enemyHealthbar->setPercentage(100.0f);
+		(*it_enemy)->dizzypic->setPosition(Vec2(x_ + 5, y_ + 5));
 
 		if (x_ >= 420)
 		{
 			(*it_enemy)->enemySprite->setVisible(false);
 			(*it_enemy)->enemyHealthbar_back->setVisible(false);
 			(*it_enemy)->enemyHealthbar->setVisible(false);
+			(*it_enemy)->dizzypic->setVisible(false);
 		}
 		else
 		{
@@ -507,6 +519,7 @@ bool Game_two::init()
 		this->addChild((*it_enemy)->enemySprite, 1);
 		this->addChild((*it_enemy)->enemyHealthbar_back, 1);
 		this->addChild((*it_enemy)->enemyHealthbar, 2, "HealthBar.png");
+		this->addChild((*it_enemy)->dizzypic,3, "vertigo.png");
 	}
 
 	// 每帧调用 update 函数
@@ -528,19 +541,33 @@ void Game_two::Enemyupdate(float dt)// 访问全体存在的怪物并且更改�
 		{
 			if ((*it_enemy)->alive())
 			{
-				if ((*it_enemy)->slowed && (*it_enemy)->slowedtime <= 3)
+				if ((*it_enemy)->dizzy && (*it_enemy)->dizzytime <= 0.2)
 				{
-					speed = (*it_enemy)->get_velocity()*0.5;
-					(*it_enemy)->slowedtime += dt;
+					speed = 0;
+					(*it_enemy)->dizzytime += dt;
 				}
-				else if ((*it_enemy)->slowed && (*it_enemy)->slowedtime > 3)
+				else if ((*it_enemy)->dizzy && (*it_enemy)->dizzytime > 0.2)
 				{
-					(*it_enemy)->slowed = false;
-					(*it_enemy)->slowedtime = 0;
+					(*it_enemy)->dizzy = false;
+					(*it_enemy)->dizzytime = 0;
+					(*it_enemy)->dizzypic->setVisible(false);
 				}
-				else
+				else//未被眩晕
 				{
-					speed = (*it_enemy)->get_velocity();
+					if ((*it_enemy)->slowed && (*it_enemy)->slowedtime <= 3)
+					{
+						speed = (*it_enemy)->get_velocity()*0.5;
+						(*it_enemy)->slowedtime += dt;
+					}
+					else if ((*it_enemy)->slowed && (*it_enemy)->slowedtime > 3)
+					{
+						(*it_enemy)->slowed = false;
+						(*it_enemy)->slowedtime = 0;
+					}
+					else
+					{
+						speed = (*it_enemy)->get_velocity();
+					}
 				}
 
 				new_x = (*it_enemy)->EnemyPositionX(), new_y = (*it_enemy)->EnemyPositionY();
@@ -580,6 +607,7 @@ void Game_two::Enemyupdate(float dt)// 访问全体存在的怪物并且更改�
 				(*it_enemy)->enemyHealthbar_back->setPosition(Vec2(new_x, new_y + 20));
 				(*it_enemy)->enemyHealthbar->setPosition(Vec2(new_x, new_y + 20));
 				(*it_enemy)->enemyHealthbar->setPercentage((*it_enemy)->getHPpercentage() * 100);
+				(*it_enemy)->dizzypic->setPosition(Vec2(new_x + 5, new_y + 5));
 
 				(*it_enemy)->set_x(new_x);
 				(*it_enemy)->set_y(new_y);
@@ -588,6 +616,7 @@ void Game_two::Enemyupdate(float dt)// 访问全体存在的怪物并且更改�
 					(*it_enemy)->enemySprite->setVisible(false);
 					(*it_enemy)->enemyHealthbar_back->setVisible(false);
 					(*it_enemy)->enemyHealthbar->setVisible(false);
+					(*it_enemy)->dizzypic->setVisible(false);
 				}
 				else
 				{
@@ -608,6 +637,7 @@ void Game_two::Enemyupdate(float dt)// 访问全体存在的怪物并且更改�
 					(*it_enemy)->enemySprite->removeFromParent();
 					(*it_enemy)->enemyHealthbar->removeFromParent();
 					(*it_enemy)->enemyHealthbar_back->removeFromParent();
+					(*it_enemy)->dizzypic->removeFromParent();
 				}
 				it_enemy = EnemyExist.erase(it_enemy);
 				// 游戏结束的标志
@@ -665,7 +695,7 @@ void Game_two::generateOneEnemy(vector<CEnemy*>& EnemyExist, int enemyType, doub
 		break;
 	case 4:
 		newEnemy = new Enemy4();
-		newEnemy->initial(4, 200, 0.75, 30, 0, 0);
+		newEnemy->initial(4, 200, 0.75f, 30, 0, 0);
 		break;
 
 	default:
@@ -702,7 +732,7 @@ void Game_two::TowerAttack(float dt)
 		for (auto enemy_it = EnemyExist.begin(); enemy_it != EnemyExist.end(); ++enemy_it)
 		{
 			enemy = *enemy_it;
-			if (tower->inRange(enemy) && enemy->EnemyPositionX() <= 420)
+			if (tower->inRange(enemy) && enemy->EnemyPositionX() <= 419)
 			{
 				inRangeEnemies.push_back(enemy);
 			}
@@ -769,6 +799,13 @@ void Game_two::moveBullet(float dt) {
 					{
 						(*it).Enemy->slowed = true;
 						(*it).Enemy->slowedtime = 0.0;
+					}
+					if ((*it).Tower->getType() == 0)
+					{
+						(*it).Enemy->dizzy = true;
+						(*it).Enemy->dizzytime = 0.0;
+						if ((*it).Enemy->alive())
+							(*it).Enemy->dizzypic->setVisible(true);
 					}
 					(*it).flag = true;
 				}
@@ -1455,48 +1492,43 @@ void Game_two::step(float Dt)
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
-	else if (countnum <= 0 && countnum>-18) {
-		sprintf(StringOfNum, "Wave 1 / 8");
+	else if (countnum <= 0 && countnum > -18) {
+		sprintf(StringOfNum, "The first wave");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -18 && countnum > -36) {
-		sprintf(StringOfNum, "Wave 2 / 8");
+		sprintf(StringOfNum, "The second wave");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -36 && countnum > -56) {
-		sprintf(StringOfNum, "Wave 3 / 8");
+		sprintf(StringOfNum, "The third wave");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -56 && countnum > -75) {
-		sprintf(StringOfNum, "Wave 4 / 8");
+		sprintf(StringOfNum, "The fourth wave");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -75 && countnum > -94) {
-		sprintf(StringOfNum, "Wave 5 / 8");
+		sprintf(StringOfNum, "The fifth wave");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -94 && countnum > -113) {
-		sprintf(StringOfNum, "Wave 6 / 8");
+		sprintf(StringOfNum, "The sixth wave");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -113 && countnum > -133) {
-		sprintf(StringOfNum, "Wave 7 / 8");
-		auto countdown = (Label*)(getChildByTag(1000));
-		countdown->setString(StringOfNum);
-	}
-	else if (countnum <= -133 && countnum > -135) {
-		sprintf(StringOfNum, "Wave 8 / 8");
+		sprintf(StringOfNum, "The seventh wave");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else {
-		sprintf(StringOfNum, "Boss coming!");
+		sprintf(StringOfNum, "The final wave");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}

@@ -55,7 +55,6 @@ public:
 		{
 			// 用于存储所有在攻击范围内的怪物
 			vector<CEnemy*> enemiesInRange;
-
 			// 寻找所有在攻击范围内的怪物
 			for (auto it = enemy.begin(); it != enemy.end(); it++)
 			{
@@ -64,11 +63,12 @@ public:
 					enemiesInRange.push_back(*it);
 				}
 			}
-
+			// 实施攻击
 			for (auto it = enemiesInRange.begin(); it != enemiesInRange.end(); it++)
 			{
-				(*it)->HP_calculate(getDamage());	// 实施攻击
+				(*it)->HP_calculate(getDamage());	
 			}
+
 			return true;
 		}
 		return false;

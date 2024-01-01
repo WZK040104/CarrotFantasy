@@ -2,18 +2,17 @@
 #include"cocos2d.h"
 
 CEnemy::CEnemy(): enemytype(0),enemy_HP(0), HP(0), velocity(0), add_coins(0), 
-				  enemy_position_x(0), enemy_position_y(0),slowed(false),slowedtime(0) {}
+				  enemy_position_x(0), enemy_position_y(0),slowed(false),slowedtime(0.0),dizzy(false),dizzytime(0.0) {}
 
-// 对象销毁时执行的清理工作，例如释放资源
 CEnemy::~CEnemy() {
 	if (enemySprite)
 	{
 		enemySprite->removeFromParent();
 	}
-};	
+};	// 对象销毁时执行的清理工作，例如释放资源
 
-// 初始化怪物的生命值,速度，金币，出生点
 void CEnemy::initial(int input_type,int input_HP, float input_velocity, int input_coins,double x,double y) 
+// 初始化怪物的生命值,速度，金币，出生点
 {
 	enemytype = input_type;
 	enemy_HP = input_HP;	 // 初始化怪物的生命值
@@ -29,25 +28,35 @@ void CEnemy::initial(int input_type,int input_HP, float input_velocity, int inpu
 		enemySprite = nullptr;
 		enemyHealthbar= nullptr;
 		enemyHealthbar_back= nullptr;
+	case 0:
+		enemySprite = cocos2d::Sprite::create("Enemy_one.png");
+		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
+		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
+		dizzypic = cocos2d::Sprite::create("vertigo.png");
+		break;
 	case 1:
 		enemySprite = cocos2d::Sprite::create("Enemy_one.png");
 		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
 		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
+		dizzypic= cocos2d::Sprite::create("vertigo.png");
 		break;
 	case 2:
 		enemySprite = cocos2d::Sprite::create("Enemy_two.png");
 		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
 		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
+		dizzypic = cocos2d::Sprite::create("vertigo.png");
 		break;
 	case 3:
 		enemySprite = cocos2d::Sprite::create("Enemy_three.png");
 		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
 		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
+		dizzypic = cocos2d::Sprite::create("vertigo.png");
 		break;
 	case 4:
 		enemySprite = cocos2d::Sprite::create("Enemy_four.png");
 		enemyHealthbar_back = cocos2d::Sprite::create("CarrotHealthBack.png");
 		enemyHealthbar = cocos2d::ProgressTimer::create(cocos2d::Sprite::create("HealthBar.png"));
+		dizzypic = cocos2d::Sprite::create("vertigo.png");
 		break;
 	default:
 		break;
@@ -105,7 +114,6 @@ cocos2d::Sprite* CEnemy::getSprite()
 {
 	return enemySprite;
 }
-
 int CEnemy::getadd_coins()
 {
 	return add_coins;

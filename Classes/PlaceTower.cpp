@@ -43,6 +43,6 @@ void placeTower(vector<CTower*>& TowerExist, int towerType, int x, int y)
 		cout << newTower->getDamage();
 		cout << newTower->getType();
 	}
-
+	
 }
 

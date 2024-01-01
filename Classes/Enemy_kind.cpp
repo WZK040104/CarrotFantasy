@@ -15,6 +15,7 @@ Enemy2::Enemy2() {
 }
 Enemy2::~Enemy2() {}
 
+
 Enemy3::Enemy3() {
 	initial(3,100, 1, 15, 0, 0);
 }

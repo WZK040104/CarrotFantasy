@@ -33,10 +33,14 @@ public:
 	int enemytype;
 	bool slowed;
 	float slowedtime;
+	bool dizzy;
+	float dizzytime;
 
 	cocos2d::Sprite* enemySprite; // 怪物的精灵
 	cocos2d::Sprite* getSprite();
-	cocos2d::ProgressTimer* enemyHealthbar; // 怪物血条
+	cocos2d::ProgressTimer* enemyHealthbar;// 怪物血条
 	cocos2d::Sprite* enemyHealthbar_back;
+	cocos2d::Sprite* dizzypic;//眩晕标志
+
 };
 #endif
