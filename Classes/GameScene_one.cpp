@@ -933,7 +933,7 @@ int Game_one::getTowerUpgradeCoins(int towerType)
 }
 
 // 处理xy的值
-bool deal_with_xy1(double &x ,double& y)
+bool deal_with_xy1(float &x , float& y)
 {
 	if (x > 102 && x <= 137)
 		x = 120;
@@ -1001,13 +1001,11 @@ void Game_one::onMouseDown(EventMouse* event)
 		{
 			board[i]->setVisible(true);
 		}
-
 		towerPosition = mousePosition;
-		double x = towerPosition.x, y = towerPosition.y;
-		bool place_success = deal_with_xy1(x, y); // 处理xy坐标，是否成功放置
+		bool place_success = deal_with_xy1(mousePosition.x, mousePosition.y); // 处理xy坐标，是否成功放置
 		bool flag = false; // 是否放在了允许放置的格子内
 		for (unsigned int i = 1; i <= sizeof(pairxy) / sizeof(pairxy[0]); i++) {
-			if (pairxy[i - 1] == Vec2(x, y))
+			if (pairxy[i - 1] == Vec2(mousePosition.x, mousePosition.y))
 			{
 				flag = true;
 				break;
@@ -1016,13 +1014,13 @@ void Game_one::onMouseDown(EventMouse* event)
 
 		if (flag && place_success)
 		{
-			towerPosition = Vec2(x, y);
-			placeTower(TowerExist, tower0Clicked, x, y);
+			towerPosition = Vec2(mousePosition.x, mousePosition.y);
+			placeTower(TowerExist, tower0Clicked, mousePosition.x, mousePosition.y);
 			current_gold_coins -= getTowerUpgradeCoins(tower0Clicked);
 			updateGoldCoinsDisplay();
 			showTowerGrey();
 			// 根据点击的防御塔类型创建相应的 Button
-			Button* towerSprite;
+			Button* towerSprite=nullptr;
 			switch (tower0Clicked)
 			{
 			case 0:
@@ -1047,26 +1045,26 @@ void Game_one::onMouseDown(EventMouse* event)
 				*name4 = new char[20], *name5 = new char[20], *name6 = new char[20],
 				*name7 = new char[20];
 
-			sprintf(name1, "%d%d", int(x), int(y));
+			sprintf(name1, "%d%d", int(mousePosition.x), int( mousePosition.y));
 			this->addChild(towerSprite, 1, name1);
 
 			// 删除按钮
 			auto deletebutton = Button::create("delete.png");
-			sprintf(name2, "%d%d_d", int(x), int(y));
+			sprintf(name2, "%d%d_d", int(mousePosition.x), int(mousePosition.y));
 			deletebutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y));
 			this->addChild(deletebutton, 2, name2);
 			deletebutton->setVisible(false);
 
 			// 升级按钮
 			auto levelupbutton = Button::create("levelup.png");
-			sprintf(name3, "%d%d_u", int(x), int(y));
+			sprintf(name3, "%d%d_u", int(mousePosition.x), int(mousePosition.y));
 			levelupbutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y + 10));
 			this->addChild(levelupbutton, 2, name3);
 			levelupbutton->setVisible(false);
 
 			// 退出按钮
 			auto returnbutton = Button::create("exit.png");
-			sprintf(name4, "%d%d_r", int(x), int(y));
+			sprintf(name4, "%d%d_r", int(mousePosition.x), int(mousePosition.y));
 			returnbutton->setPosition(Vec2(towerPosition.x + 10, towerPosition.y - 10));
 			this->addChild(returnbutton, 2, name4);
 			returnbutton->setVisible(false);
@@ -1076,7 +1074,7 @@ void Game_one::onMouseDown(EventMouse* event)
 			levelupcoin->setColor(Color3B(255, 255, 0));
 			levelupcoin->setVisible(false);
 			levelupcoin->setPosition(Vec2(towerPosition.x + 20, towerPosition.y + 10));
-			sprintf(name5, "%d%d_c", int(x), int(y));
+			sprintf(name5, "%d%d_c", int(mousePosition.x), int(mousePosition.y));
 			this->addChild(levelupcoin, 2, name5);
 
 			// 防御塔等级标签
@@ -1084,14 +1082,14 @@ void Game_one::onMouseDown(EventMouse* event)
 			towerlevel->setColor(Color3B(255, 0, 0));
 			towerlevel->setVisible(false);
 			towerlevel->setPosition(Vec2(towerPosition.x - 10, towerPosition.y - 10));
-			sprintf(name6, "%d%d_l", int(x), int(y));
+			sprintf(name6, "%d%d_l", int(mousePosition.x), int(mousePosition.y));
 			this->addChild(towerlevel, 2, name6);
 
 			// 防御塔攻击范围
 			auto towerrange = Sprite::create("range.png");
 			towerrange->setVisible(false);
 			towerrange->setPosition(Vec2(towerPosition.x, towerPosition.y));
-			sprintf(name7, "%d%d_g", int(x), int(y));
+			sprintf(name7, "%d%d_g", int(mousePosition.x), int(mousePosition.y));
 			this->addChild(towerrange, 2, name7);
 
 			delete[]name1;
@@ -1104,9 +1102,7 @@ void Game_one::onMouseDown(EventMouse* event)
 
 			// 点击防御塔
 			towerSprite->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
-				x = mousePosition.x;
-				y = mousePosition.y;
-				deal_with_xy1(x, y);
+				deal_with_xy1(mousePosition.x, mousePosition.y);
 
 				switch (type)
 				{
@@ -1117,22 +1113,22 @@ void Game_one::onMouseDown(EventMouse* event)
 						*name4 = new char[20], *name5 = new char[20],
 						*name6 = new char[20], *name7 = new char[20];
 
-					sprintf(name2, "%d%d_d", int(x), int(y));
+					sprintf(name2, "%d%d_d", int(mousePosition.x), int(mousePosition.y));
 					layout_delete = this->getChildByName(name2);
 
-					sprintf(name3, "%d%d_u", int(x), int(y));
+					sprintf(name3, "%d%d_u", int(mousePosition.x), int(mousePosition.y));
 					layout_uplevel = this->getChildByName(name3);
 
-					sprintf(name4, "%d%d_r", int(x), int(y));
+					sprintf(name4, "%d%d_r", int(mousePosition.x), int(mousePosition.y));
 					layout_return = this->getChildByName(name4);
 
-					sprintf(name5, "%d%d_c", int(x), int(y));
+					sprintf(name5, "%d%d_c", int(mousePosition.x), int(mousePosition.y));
 					layout_coin = (Label*)(getChildByName(name5));
 
-					sprintf(name6, "%d%d_l", int(x), int(y));
+					sprintf(name6, "%d%d_l", int(mousePosition.x), int(mousePosition.y));
 					layout_nowlevel = (Label*)(getChildByName(name6));
 
-					sprintf(name7, "%d%d_g", int(x), int(y));
+					sprintf(name7, "%d%d_g", int(mousePosition.x), int(mousePosition.y));
 					layout_range = (Sprite*)(getChildByName(name7));
 
 					delete[]name2;
@@ -1147,7 +1143,7 @@ void Game_one::onMouseDown(EventMouse* event)
 					int i = 0;
 					while (it != TowerExist.end())
 					{
-						if (x == TowerExist[i]->getPositionX() && y == TowerExist[i]->getPositionY()) {
+						if (mousePosition.x == TowerExist[i]->getPositionX() && mousePosition.y == TowerExist[i]->getPositionY()) {
 							int money = TowerExist[i]->getUpgradeCost();
 							layout_coin->setString(std::to_string(money));
 							char* levelname = new char[10];
@@ -1178,9 +1174,7 @@ void Game_one::onMouseDown(EventMouse* event)
 
 			// 点击返回按钮
 			returnbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
-				x = mousePosition.x;
-				y = mousePosition.y;
-				deal_with_xy1(x, y);
+				deal_with_xy1(mousePosition.x,mousePosition.y);
 
 				switch (type)
 				{
@@ -1190,22 +1184,22 @@ void Game_one::onMouseDown(EventMouse* event)
 					char*name2 = new char[20], *name3 = new char[20],
 						*name4 = new char[20], *name5 = new char[20],
 						*name6 = new char[20], *name7 = new char[20];
-					sprintf(name2, "%d%d_d", int(x), int(y));
+					sprintf(name2, "%d%d_d", int(mousePosition.x), int(mousePosition.y));
 					layout_delete = this->getChildByName(name2);
 
-					sprintf(name3, "%d%d_u", int(x), int(y));
+					sprintf(name3, "%d%d_u", int(mousePosition.x), int(mousePosition.y));
 					layout_uplevel = this->getChildByName(name3);
 
-					sprintf(name4, "%d%d_r", int(x), int(y));
+					sprintf(name4, "%d%d_r", int(mousePosition.x), int(mousePosition.y));
 					layout_return = this->getChildByName(name4);
 
-					sprintf(name5, "%d%d_c", int(x), int(y));
+					sprintf(name5, "%d%d_c", int(mousePosition.x), int(mousePosition.y));
 					layout_coin = (Label*)(getChildByName(name5));
 
-					sprintf(name6, "%d%d_l", int(x), int(y));
+					sprintf(name6, "%d%d_l", int(mousePosition.x), int(mousePosition.y));
 					layout_nowlevel = (Label*)(getChildByName(name6));
 
-					sprintf(name7, "%d%d_g", int(x), int(y));
+					sprintf(name7, "%d%d_g", int(mousePosition.x), int(mousePosition.y));
 					layout_range = (Sprite*)(getChildByName(name7));
 
 					delete[]name2;
@@ -1231,9 +1225,7 @@ void Game_one::onMouseDown(EventMouse* event)
 
 			// 点击删除按钮
 			deletebutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
-				x = mousePosition.x;
-				y = mousePosition.y;
-				deal_with_xy1(x, y);
+				deal_with_xy1(mousePosition.x, mousePosition.y);
 
 				switch (type)
 				{
@@ -1243,25 +1235,25 @@ void Game_one::onMouseDown(EventMouse* event)
 					char*name1 = new char[20], *name2 = new char[20], *name3 = new char[20],
 						*name4 = new char[20], *name5 = new char[20], *name6 = new char[20],
 						*name7 = new char[20];
-					sprintf(name1, "%d%d", int(x), int(y));
+					sprintf(name1, "%d%d", int(mousePosition.x), int(mousePosition.y));
 					auto layout_tower = this->getChildByName(name1);
 
-					sprintf(name2, "%d%d_d", int(x), int(y));
+					sprintf(name2, "%d%d_d", int(mousePosition.x), int(mousePosition.y));
 					layout_delete = this->getChildByName(name2);
 
-					sprintf(name3, "%d%d_u", int(x), int(y));
+					sprintf(name3, "%d%d_u", int(mousePosition.x), int(mousePosition.y));
 					layout_uplevel = this->getChildByName(name3);
 
-					sprintf(name4, "%d%d_r", int(x), int(y));
+					sprintf(name4, "%d%d_r", int(mousePosition.x), int(mousePosition.y));
 					layout_return = this->getChildByName(name4);
 
-					sprintf(name5, "%d%d_c", int(x), int(y));
+					sprintf(name5, "%d%d_c", int(mousePosition.x), int(mousePosition.y));
 					layout_coin = (Label*)(getChildByName(name5));
 
-					sprintf(name6, "%d%d_l", int(x), int(y));
+					sprintf(name6, "%d%d_l", int(mousePosition.x), int(mousePosition.y));
 					layout_nowlevel = (Label*)(getChildByName(name6));
 
-					sprintf(name7, "%d%d_g", int(x), int(y));
+					sprintf(name7, "%d%d_g", int(mousePosition.x), int(mousePosition.y));
 					layout_range = (Sprite*)(getChildByName(name7));
 
 					delete[]name1;
@@ -1283,7 +1275,7 @@ void Game_one::onMouseDown(EventMouse* event)
 
 					// 需要注意的是之前防御塔已经加入vector中，因此这里也要删除
 					for (auto it = TowerExist.begin(); it != TowerExist.end();) {
-						if (x == (*it)->getPositionX() && y == (*it)->getPositionY()) {
+						if (mousePosition.x == (*it)->getPositionX() && mousePosition.y == (*it)->getPositionY()) {
 							it = TowerExist.erase(it);
 							current_gold_coins += 10;
 							updateGoldCoinsDisplay();
@@ -1303,9 +1295,7 @@ void Game_one::onMouseDown(EventMouse* event)
 
 			// 点击升级按钮
 			levelupbutton->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
-				x = mousePosition.x;
-				y = mousePosition.y;
-				deal_with_xy1(x, y);
+				deal_with_xy1(mousePosition.x, mousePosition.y);
 
 				switch (type)
 				{
@@ -1316,22 +1306,22 @@ void Game_one::onMouseDown(EventMouse* event)
 						*name4 = new char[20], *name5 = new char[20],
 						*name6 = new char[20], *name7 = new char[20];
 
-					sprintf(name2, "%d%d_d", int(x), int(y));
+					sprintf(name2, "%d%d_d", int(mousePosition.x), int(mousePosition.y));
 					layout_delete = this->getChildByName(name2);
 
-					sprintf(name3, "%d%d_u", int(x), int(y));
+					sprintf(name3, "%d%d_u", int(mousePosition.x), int(mousePosition.y));
 					layout_uplevel = this->getChildByName(name3);
 
-					sprintf(name4, "%d%d_r", int(x), int(y));
+					sprintf(name4, "%d%d_r", int(mousePosition.x), int(mousePosition.y));
 					layout_return = this->getChildByName(name4);
 
-					sprintf(name5, "%d%d_c", int(x), int(y));
+					sprintf(name5, "%d%d_c", int(mousePosition.x), int(mousePosition.y));
 					layout_coin = (Label*)(getChildByName(name5));
 
-					sprintf(name6, "%d%d_l", int(x), int(y));
+					sprintf(name6, "%d%d_l", int(mousePosition.x), int(mousePosition.y));
 					layout_nowlevel = (Label*)(getChildByName(name6));
 
-					sprintf(name7, "%d%d_g", int(x), int(y));
+					sprintf(name7, "%d%d_g", int(mousePosition.x), int(mousePosition.y));
 					layout_range = (Sprite*)(getChildByName(name7));
 
 					delete[]name2;
@@ -1346,7 +1336,7 @@ void Game_one::onMouseDown(EventMouse* event)
 					int i = 0;
 					while (it != TowerExist.end())
 					{
-						if (x == TowerExist[i]->getPositionX() && y == TowerExist[i]->getPositionY()) {
+						if (mousePosition.x == (*it)->getPositionX() && mousePosition.y == (*it)->getPositionY()) {
 							// 如果等级小于满级
 							if (TowerExist[i]->getLevel() < 4)
 							{
@@ -1496,43 +1486,43 @@ void Game_one::step(float Dt)
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
-	else if (countnum <= 0 && countnum>-18) {
-		sprintf(StringOfNum, "The first wave");
+	else if (countnum <= 0 && countnum > -18) {
+		sprintf(StringOfNum, "Wave 1 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -18 && countnum > -36) {
-		sprintf(StringOfNum, "The second wave");
+		sprintf(StringOfNum, "Wave 2 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -36 && countnum > -56) {
-		sprintf(StringOfNum, "The third wave");
+		sprintf(StringOfNum, "Wave 3 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -56 && countnum > -75) {
-		sprintf(StringOfNum, "The fourth wave");
+		sprintf(StringOfNum, "Wave 4 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -75 && countnum > -94) {
-		sprintf(StringOfNum, "The fifth wave");
+		sprintf(StringOfNum, "Wave 5 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -94 && countnum > -113) {
-		sprintf(StringOfNum, "The sixth wave");
+		sprintf(StringOfNum, "Wave 6 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else if (countnum <= -113 && countnum > -133) {
-		sprintf(StringOfNum, "The seventh wave");
+		sprintf(StringOfNum, "Wave 7 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}
 	else {
-		sprintf(StringOfNum, "The final wave");
+		sprintf(StringOfNum, "Wave 8 / 8");
 		auto countdown = (Label*)(getChildByTag(1000));
 		countdown->setString(StringOfNum);
 	}

@@ -48,25 +48,25 @@ public:
 		,Vec2(295,109) ,Vec2(330,109) ,Vec2(365,109) ,Vec2(400,109) ,Vec2(295,143)
 		,Vec2(295,177) ,Vec2(295,211) ,Vec2(295,245) };
 	// 添加侧边防御塔的图标
-	cocos2d::Sprite* tower_zero0;
-	cocos2d::Sprite* tower_one0;
-	cocos2d::Sprite* tower_two0;
-	cocos2d::Sprite* tower_three0;
-	cocos2d::Sprite* tower_back0;
-	cocos2d::Sprite* tower_back1;
-	cocos2d::Sprite* tower_back2;
-	cocos2d::Sprite* tower_back3;
-	cocos2d::Label* buildcoins0;
-	cocos2d::Label* buildcoins1;
-	cocos2d::Label* buildcoins2;
-	cocos2d::Label* buildcoins3;
+	cocos2d::Sprite* tower_zero0 = nullptr;
+	cocos2d::Sprite* tower_one0 = nullptr;
+	cocos2d::Sprite* tower_two0 = nullptr;
+	cocos2d::Sprite* tower_three0 = nullptr;
+	cocos2d::Sprite* tower_back0 = nullptr;
+	cocos2d::Sprite* tower_back1 = nullptr;
+	cocos2d::Sprite* tower_back2 = nullptr;
+	cocos2d::Sprite* tower_back3 = nullptr;
+	cocos2d::Label* buildcoins0 = nullptr;
+	cocos2d::Label* buildcoins1 = nullptr;
+	cocos2d::Label* buildcoins2 = nullptr;
+	cocos2d::Label* buildcoins3 = nullptr;
 	// 防御塔组件图标
-	cocos2d::Node* layout_delete;
-	cocos2d::Node* layout_uplevel;
-	cocos2d::Node* layout_return;
-	cocos2d::Label* layout_coin;
-	cocos2d::Label* layout_nowlevel;
-	cocos2d::Sprite* layout_range;
+	cocos2d::Node* layout_delete = nullptr;
+	cocos2d::Node* layout_uplevel = nullptr;
+	cocos2d::Node* layout_return = nullptr;
+	cocos2d::Label* layout_coin = nullptr;
+	cocos2d::Label* layout_nowlevel = nullptr;
+	cocos2d::Sprite* layout_range = nullptr;
 	// 暂停
 	void Pause(Ref* pSender);
 	// 点击侧边防御塔并放置
@@ -90,7 +90,7 @@ public:
 	// 放置位置错误的标
 	cocos2d::Label* insufficientPlaceLabel;
 	// 可放置位置边框
-	cocos2d::Sprite* board[25];
+	cocos2d::Sprite* board[25] = {};
 	// 等级已满的标
 	cocos2d::Label* insufficientLevelLabel;
 	// 显示放置位置错误
@@ -114,8 +114,6 @@ public:
 	void carrotHealthUpdate(float dt);
 	// 子弹移动
 	void moveBullet(float dt);
-	// 范围伤害子弹
-	void rangeBullet(float dt);
 	// implement the "static create()" method manually
 	CREATE_FUNC(Game_one);
 };
